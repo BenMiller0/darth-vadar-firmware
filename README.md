@@ -1,17 +1,6 @@
 # Whiteout LED Controller
 
-Darth Vader suit firmware built on FreeRTOS.
-
-## Features
-
-- **9 Independent LEDs** with dedicated FreeRTOS tasks
-- **Normal mode** with realistic breathing patterns for red LEDs
-- **Smooth PWM fading** or digital on/off blinking
-- **Volatile random mode** with per-LED volatility control
-- **Per-LED brightness control** for fine-tuned appearance
-- **Memory profiling** for monitoring task performance
-- **Power management** with light sleep and CPU frequency scaling
-- **Test mode** for cycling through all configurations
+Darth Vader suit firmware built on FreeRTOS. Built for Star Wars Club @ UC San Diego's Screen accurate Darth Vadar Suit used for club promotion and film making. This firmware controls the blinking of each light on his suit. Makes them easily programmable and optomizes CPU usage to conserve power and boost proformance.
 
 ## Quick Start
 

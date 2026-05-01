@@ -17,7 +17,7 @@
       audio["BREATH"] = new Audio("audio/0003.mp3");
       audio["BREATH"].loop = true;
 
-      ws = new WebSocket("ws://YOUR_COMPUTER_IP:8080");
+      const ws = new WebSocket(`wss://${location.host}`);
 
       ws.onopen = () => {
         document.getElementById("status").innerText = "Connected";

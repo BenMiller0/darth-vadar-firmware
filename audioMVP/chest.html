@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <h2>Vader Player</h2>
+  <button onclick="init()">Start Audio</button>
+  <p id="status">Not connected</p>
+
+  <script>
+    let ws;
+    let audio = {};
+    let current = null;
+
+    function init() {
+      // preload audio
+      audio["PLAY_1"] = new Audio("audio/0001.mp3");
+      audio["PLAY_2"] = new Audio("audio/0002.mp3");
+      audio["BREATH"] = new Audio("audio/0003.mp3");
+      audio["BREATH"].loop = true;
+
+      ws = new WebSocket("ws://YOUR_COMPUTER_IP:8080");
+
+      ws.onopen = () => {
+        document.getElementById("status").innerText = "Connected";
+      };
+
+      ws.onmessage = (event) => {
+        handle(event.data.trim());
+      };
+    }
+
+    function handle(cmd) {
+      if (cmd === "STOP") {
+        if (current) {
+          current.pause();
+          current.currentTime = 0;
+        }
+        return;
+      }
+
+      if (audio[cmd]) {
+        if (current) {
+          current.pause();
+          current.currentTime = 0;
+        }
+
+        current = audio[cmd];
+        current.play();
+      }
+    }
+  </script>
+</body>
+</html>

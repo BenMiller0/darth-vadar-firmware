@@ -104,9 +104,9 @@
 #define R_BELT_RED_BRIGHTNESS          100
 #define R_BELT_GREEN_0_BRIGHTNESS      100
 #define R_BELT_GREEN_1_BRIGHTNESS      100
-#define CHEST_RED_1_BRIGHTNESS         100
-#define CHEST_RED_2_BRIGHTNESS         100
-#define CHEST_RED_3_BRIGHTNESS         100
+#define CHEST_RED_1_BRIGHTNESS         255
+#define CHEST_RED_2_BRIGHTNESS         255
+#define CHEST_RED_3_BRIGHTNESS         255
 
 // -----------------------------------------------------------------------------
 // POWER MANAGEMENT CONFIGURATION (BATTERY MODE)

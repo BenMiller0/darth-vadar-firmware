@@ -17,7 +17,7 @@
       audio["BREATH"] = new Audio("audio/0003.mp3");
       audio["BREATH"].loop = true;
 
-      const ws = new WebSocket(`wss://${location.host}`);
+      ws = new WebSocket(`wss://${location.host}`);
 
       ws.onopen = () => {
         document.getElementById("status").innerText = "Connected";
@@ -26,6 +26,7 @@
       ws.onmessage = (event) => {
         handle(event.data.trim());
       };
+      ws.onmessage = (event) => {
     }
 
     function handle(cmd) {

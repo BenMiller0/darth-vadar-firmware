@@ -491,14 +491,11 @@
       }
 
       if (audio[cmd]) {
-        // Start breathing if not already playing
-        if (!breathingPlaying) {
-          audio["BREATH"].play().catch(() => {});
-          breathingPlaying = true;
+        // NEVER auto-start breathing - only play if explicitly commanded
+        // Only adjust breathing volume if it's already playing
+        if (breathingPlaying) {
+          audio["BREATH"].volume = 0.3;
         }
-        
-        // Lower breathing volume
-        audio["BREATH"].volume = 0.3;
         
         // Stop any previous non-breathing audio
         if (current && current !== audio["BREATH"]) {
@@ -514,6 +511,14 @@
         // Set up volume restoration when audio ends
         current.onended = () => {
           restoreBreathingVolume();
+          
+          // Ensure breathing continues playing if it was already playing
+          if (breathingPlaying && audio["BREATH"]) {
+            if (audio["BREATH"].paused) {
+              audio["BREATH"].play().catch(() => {});
+            }
+          }
+          
           current = audio["BREATH"];
         };
       }

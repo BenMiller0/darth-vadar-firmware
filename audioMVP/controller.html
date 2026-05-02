@@ -402,6 +402,11 @@ let globalCooldown = 0; // Global cooldown timestamp
 let globalCooldownDuration = 2000; // 2 seconds for all commands
 let activeProgressBar = null; // Track current progress bar
 
+// Command retry system
+let commandRetries = new Map(); // Track retry attempts
+let maxRetries = 3; // Maximum retry attempts per command
+let retryDelay = 1000; // 1 second between retries
+
 function connect(){
   if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) {
     console.log('Connection already in progress');
@@ -470,9 +475,12 @@ function connect(){
       if (data.type === 'ack') {
         if (pendingCommands.has(data.id)) {
           const cmd = pendingCommands.get(data.id);
-          console.log('Command acknowledged:', cmd.command, 'ID:', data.id);
+          console.log('Command acknowledged:', cmd.command, 'ID:', data.id, 'Retries:', cmd.retryCount);
           pendingCommands.delete(data.id);
           connectionHealth.commandsAcked++;
+          
+          // Clear any error indicators
+          clearErrorIndicator();
         }
         return;
       }
@@ -561,21 +569,60 @@ function send(cmd){
       console.log('Command sent:', cmd, 'ID:', cmdId);
       connectionHealth.commandsSent++;
       
-      // Track for acknowledgment
+      // Track for acknowledgment and retry
       pendingCommands.set(cmdId, {
         command: cmd,
         timestamp: Date.now(),
-        retryCount: 0
+        retryCount: 0,
+        originalSendTime: Date.now()
       });
       
-      // Set timeout for acknowledgment
+      // Set timeout for acknowledgment and retry
       setTimeout(() => {
         if (pendingCommands.has(cmdId)) {
-          console.warn('Command not acknowledged:', cmd, 'ID:', cmdId);
-          pendingCommands.delete(cmdId);
-          connectionHealth.errors++;
+          const cmdData = pendingCommands.get(cmdId);
+          console.warn('Command not acknowledged:', cmd, 'ID:', cmdId, 'Retries:', cmdData.retryCount);
+          
+          if (cmdData.retryCount < maxRetries) {
+            // Retry the command
+            cmdData.retryCount++;
+            cmdData.timestamp = Date.now();
+            
+            console.log('Retrying command:', cmd, 'Attempt:', cmdData.retryCount + 1);
+            
+            // Resend with same ID for tracking
+            const retryMessage = JSON.stringify({ type: 'cmd', id: cmdId, command: cmd, retry: true });
+            if (ws && ws.readyState === WebSocket.OPEN) {
+              ws.send(retryMessage);
+              connectionHealth.commandsSent++;
+              
+              // Set another timeout for this retry
+              setTimeout(() => {
+                if (pendingCommands.has(cmdId)) {
+                  const retryData = pendingCommands.get(cmdId);
+                  if (retryData.retryCount < maxRetries) {
+                    // Recursive retry
+                    send(cmd);
+                  } else {
+                    // Max retries reached, give up
+                    console.error('Command failed after max retries:', cmd, 'ID:', cmdId);
+                    pendingCommands.delete(cmdId);
+                    connectionHealth.errors++;
+                    
+                    // Show error to user
+                    showErrorIndicator(cmd);
+                  }
+                }
+              }, retryDelay);
+            }
+          } else {
+            // Max retries reached
+            pendingCommands.delete(cmdId);
+            connectionHealth.errors++;
+            showErrorIndicator(cmd);
+          }
         }
-      }, 5000); // 5 second timeout
+      }, 3000); // 3 second timeout for acknowledgment
       
     } catch (error) {
       console.error('Failed to send command:', error);
@@ -695,6 +742,30 @@ function stopBreathing(btn){
   document.getElementById('breathSection').classList.remove('breathing-active');
 }
 
+// Error indicator for failed commands
+function showErrorIndicator(command) {
+  const statusReadout = document.getElementById('lastCmd');
+  const originalText = statusReadout.textContent;
+  
+  statusReadout.textContent = `COMMAND FAILED: ${command}`;
+  statusReadout.style.color = 'var(--red-glow)';
+  statusReadout.style.animation = 'blink 1s';
+  
+  setTimeout(() => {
+    statusReadout.textContent = originalText;
+    statusReadout.style.color = '';
+    statusReadout.style.animation = '';
+  }, 3000);
+}
+
+function clearErrorIndicator() {
+  const statusReadout = document.getElementById('lastCmd');
+  if (statusReadout.textContent.includes('COMMAND FAILED')) {
+    statusReadout.textContent = 'LAST CMD: —';
+    statusReadout.style.color = '';
+    statusReadout.style.animation = '';
+  }
+}
 
 connect();
 </script>

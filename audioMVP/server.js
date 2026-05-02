@@ -56,22 +56,79 @@ const server = http.createServer((req, res) => {
 });
 
 // ---- WebSocket server ----
-const wss = new WebSocket.Server({ server });
+const wss = new WebSocket.Server({ 
+  server,
+  perMessageDeflate: false // Disable compression for better compatibility
+});
 
-wss.on('connection', (ws) => {
-  console.log("Client connected");
+// Heartbeat interval for all clients
+const HEARTBEAT_INTERVAL = 30000; // 30 seconds
+
+function heartbeat() {
+  wss.clients.forEach(client => {
+    if (client.readyState === WebSocket.OPEN) {
+      client.ping();
+    }
+  });
+}
+
+// Start heartbeat interval
+setInterval(heartbeat, HEARTBEAT_INTERVAL);
+
+wss.on('connection', (ws, req) => {
+  console.log(`Client connected from: ${req.socket.remoteAddress}`);
+  ws.isAlive = true;
+
+  // Handle pong responses
+  ws.on('pong', () => {
+    ws.isAlive = true;
+  });
 
   ws.on('message', (msg) => {
+    const message = msg.toString().trim();
+    
+    // Handle ping messages from client
+    if (message === 'ping') {
+      ws.send('pong');
+      return;
+    }
+    
+    console.log('Received command:', message);
+    
     // broadcast to all clients (player phones)
     wss.clients.forEach(client => {
       if (client.readyState === WebSocket.OPEN) {
-        client.send(msg.toString());
+        try {
+          client.send(message);
+        } catch (error) {
+          console.error('Failed to send message to client:', error);
+        }
       }
     });
   });
 
-  ws.on('close', () => console.log("Client disconnected"));
+  ws.on('close', (code, reason) => {
+    console.log(`Client disconnected, code: ${code}, reason: ${reason}`);
+    ws.isAlive = false;
+  });
+
+  ws.on('error', (error) => {
+    console.error('WebSocket error:', error);
+  });
 });
+
+// Clean up dead connections
+setInterval(() => {
+  wss.clients.forEach(client => {
+    if (!client.isAlive) {
+      console.log('Terminating dead connection');
+      client.terminate();
+      return;
+    }
+    client.isAlive = false;
+    client.ping();
+  });
+}, HEARTBEAT_INTERVAL);
 
 server.listen(PORT, () => {
   console.log(`Server running: http://localhost:${PORT}`);

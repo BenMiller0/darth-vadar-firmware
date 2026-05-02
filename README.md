@@ -1,10 +1,18 @@
-# Darth Vader Suit Firmware
+# Darth Vader Suit Firmware - Dual ESP32 Architecture
 Built on FreeRTOS. For Star Wars Club @ UC San Diego's Screen accurate Darth Vader Suit used for club promotion and film making. Optimizes CPU usage to conserve power and boost performance.
+
+## Architecture Overview
+This firmware uses a dual ESP32 architecture for improved performance and modularity:
+- **Belt ESP32**: Controls 6 belt LEDs (2 red, 4 green) and touch sensor
+- **Chest ESP32**: Controls 3 chest red LEDs
+- **Independent Operation**: Each ESP32 runs independently without communication
 
 ## Features
 
-- **9 Independent LEDs** with dedicated FreeRTOS tasks
-- **Capacitive touch brightness control** for belt red LEDs
+- **9 Independent LEDs** split across two ESP32s with dedicated FreeRTOS tasks
+- **Dual ESP32 Architecture** for distributed processing and reliability
+- **Independent Operation**: Each ESP32 runs separately without communication
+- **Capacitive touch brightness control** for belt red LEDs (belt ESP32 only)
 - **Normal mode** with realistic breathing patterns for red LEDs
 - **Smooth PWM fading** or digital on/off blinking
 - **Volatile random mode** with per-LED volatility control
@@ -16,8 +24,11 @@ Built on FreeRTOS. For Star Wars Club @ UC San Diego's Screen accurate Darth Vad
 ## Quick Start
 
 ### Normal Operation
-Edit `include/constants.hpp`. The important constants to highlight:
+Edit the constants files in each ESP32 directory:
+- **Belt ESP32**: `belt/include/constants.hpp`
+- **Chest ESP32**: `chest/include/constants.hpp`
 
+The important constants to highlight:
 ```cpp
 #define NORMAL_MODE             1    // Normal breathing mode (0 = volatile mode)
 #define SMOOTH_BLINKING         0    // PWM fading (0 = digital)
@@ -42,18 +53,20 @@ For battery operation, configure these settings:
 
 ## Configuration
 
-### LED Pins
+### Belt ESP32 LED Pins
 - L_BELT_RED: Pin 13
 - L_BELT_GREEN_0: Pin 27  
 - L_BELT_GREEN_1: Pin 26
 - R_BELT_RED: Pin 25
 - R_BELT_GREEN_0: Pin 33
 - R_BELT_GREEN_1: Pin 32
+
+### Chest ESP32 LED Pins
 - CHEST_RED_1: Pin 4
 - CHEST_RED_2: Pin 22
 - CHEST_RED_3: Pin 23
 
-### Touch Sensor Pin
+### Touch Sensor Pin (Belt ESP32 Only)
 - TOUCH_BRIGHTNESS_PIN: GPIO 14 (T6) - Capacitive touch for belt red LED brightness control
 
 ### Timing
@@ -100,14 +113,17 @@ The capacitive touch sensor on GPIO 14 allows real-time brightness adjustment fo
 ## Build & Upload
 
 ### Requirements
-- ESP32 development board
+- 2x ESP32 development boards
 - PlatformIO extension for VS Code
-- USB cable for programming
+- USB cable for programming each ESP32
 
 ### Instructions
-1. Open the project in VS Code
-2. Use the PlatformIO extension to build and upload to ESP32
-3. Monitor serial output at 115200 baud (if enabled)
+1. **Belt ESP32**: Open the `belt/` directory in VS Code
+2. Use PlatformIO to build and upload to the belt ESP32
+3. **Chest ESP32**: Open the `chest/` directory in VS Code
+4. Use PlatformIO to build and upload to the chest ESP32
+5. **Power On**: Both ESP32s run independently - no wiring needed between them
+6. Monitor serial output at 115200 baud (if enabled) for each ESP32
 
 ### PlatformIO Configuration
 The project is configured for ESP32 with:
@@ -119,27 +135,38 @@ The project is configured for ESP32 with:
 
 ```
 whiteout/
-├── include/
-│   ├── constants.hpp          # Configuration constants
-│   ├── led_blink_task.hpp     # LED task interface
-│   ├── blink_helpers.hpp      # PWM and helper functions
-│   ├── normal_mode.hpp        # Normal mode declarations
-│   ├── test_mode.hpp          # Test mode declarations
-│   └── memory_profiler.hpp    # Memory profiling utilities
-├── src/
-│   ├── main.cpp               # Setup & task creation
-│   ├── led_blink_task.cpp     # LED task implementation
-│   ├── blink_helpers.cpp      # PWM and helper implementation
-│   ├── normal_mode.cpp        # Normal mode implementation
-│   ├── test_mode.cpp          # Test mode implementation
-│   └── memory_profiler.cpp    # Memory profiling implementation
-├── platformio.ini             # PlatformIO configuration
+├── belt/                         # Belt ESP32 firmware
+│   ├── include/
+│   │   ├── constants.hpp          # Belt configuration constants
+│   │   ├── led_blink_task.hpp     # LED task interface
+│   │   ├── blink_helpers.hpp      # PWM and helper functions
+│   │   ├── normal_mode.hpp        # Normal mode declarations
+│   │   └── memory_profiler.hpp    # Memory profiling utilities
+│   ├── src/
+│   │   ├── main.cpp               # Belt setup & task creation
+│   │   ├── led_blink_task.cpp     # LED task implementation
+│   │   ├── blink_helpers.cpp      # PWM and helper implementation
+│   │   ├── normal_mode.cpp        # Normal mode implementation
+│   │   └── memory_profiler.cpp    # Memory profiling implementation
+│   └── platformio.ini             # PlatformIO configuration
+├── chest/                        # Chest ESP32 firmware
+│   ├── include/
+│   │   ├── constants.hpp          # Chest configuration constants
+│   │   ├── led_blink_task.hpp     # LED task interface
+│   │   ├── blink_helpers.hpp      # PWM and helper functions
+│   │   ├── normal_mode.hpp        # Normal mode declarations
+│   │   └── memory_profiler.hpp    # Memory profiling utilities
+│   ├── src/
+│   │   ├── main.cpp               # Chest setup & task creation
+│   │   ├── led_blink_task.cpp     # LED task implementation
+│   │   ├── blink_helpers.cpp      # PWM and helper implementation
+│   │   ├── normal_mode.cpp        # Normal mode implementation
+│   │   └── memory_profiler.cpp    # Memory profiling implementation
+│   └── platformio.ini             # PlatformIO configuration
 └── README.md
 ```
 
 ## Modes
-
-### Normal Mode
 Realistic breathing pattern for Darth Vader suit:
 - **Belt red LEDs**: Long on time (~10s) with short off time (~1s), low volatility
 - **Chest red LEDs**: Long off time (~15s) with short on time (~1s), low volatility

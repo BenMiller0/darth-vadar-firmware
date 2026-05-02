@@ -381,26 +381,59 @@
 
 // ── WEBSOCKET ────────────────────────────────────────────────────────────────
 let ws;
+let reconnectAttempts = 0;
+let maxReconnectAttempts = 10;
+let baseReconnectDelay = 1000;
+let commandQueue = [];
+let heartbeatInterval = null;
+let isManualClose = false;
 
 function connect(){
+  if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) {
+    console.log('Connection already in progress');
+    return;
+  }
+  
+  isManualClose = false;
   const proto=location.protocol==='https:'?'wss:':'ws:';
   const wsUrl = `${proto}//${location.host}`;
-  console.log('Connecting to WebSocket:', wsUrl);
+  console.log(`Connecting to WebSocket (attempt ${reconnectAttempts + 1}):`, wsUrl);
+  
   ws=new WebSocket(wsUrl);
   
   ws.onopen=()=>{
     console.log('WebSocket connected');
+    reconnectAttempts = 0;
     document.getElementById('statusDot').className='status-dot connected';
     const t=document.getElementById('status');
     t.textContent='LINK ESTABLISHED'; t.className='status-text connected';
+    
+    // Send queued commands
+    while (commandQueue.length > 0) {
+      const cmd = commandQueue.shift();
+      send(cmd);
+    }
+    
+    // Start heartbeat
+    startHeartbeat();
   };
   
-  ws.onclose=()=>{
-    console.log('WebSocket disconnected');
+  ws.onclose=(event)=>{
+    console.log('WebSocket disconnected, code:', event.code, 'reason:', event.reason);
+    stopHeartbeat();
     document.getElementById('statusDot').className='status-dot disconnected';
     const t=document.getElementById('status');
-    t.textContent='LINK LOST — RETRY...'; t.className='status-text disconnected';
-    setTimeout(connect,2000);
+    
+    if (!isManualClose && reconnectAttempts < maxReconnectAttempts) {
+      const delay = Math.min(baseReconnectDelay * Math.pow(2, reconnectAttempts), 30000);
+      t.textContent=`LINK LOST — RETRY IN ${Math.round(delay/1000)}S...`; t.className='status-text disconnected';
+      reconnectAttempts++;
+      setTimeout(connect, delay);
+    } else if (reconnectAttempts >= maxReconnectAttempts) {
+      t.textContent='MAX RECONNECT ATTEMPTS REACHED'; t.className='status-text disconnected';
+    } else {
+      t.textContent='CONNECTION CLOSED'; t.className='status-text disconnected';
+    }
   };
   
   ws.onerror=(error)=>{
@@ -409,9 +442,56 @@ function connect(){
     const t=document.getElementById('status');
     t.textContent='CONNECTION ERROR'; t.className='status-text disconnected';
   };
+  
+  ws.onmessage=(event)=>{
+    if (event.data === 'pong') {
+      // Heartbeat response received
+      return;
+    }
+  };
 }
 
-function send(cmd){ if(ws&&ws.readyState===WebSocket.OPEN) ws.send(cmd); }
+function startHeartbeat() {
+  stopHeartbeat();
+  heartbeatInterval = setInterval(() => {
+    if (ws && ws.readyState === WebSocket.OPEN) {
+      ws.send('ping');
+    }
+  }, 30000); // Send ping every 30 seconds
+}
+
+function stopHeartbeat() {
+  if (heartbeatInterval) {
+    clearInterval(heartbeatInterval);
+    heartbeatInterval = null;
+  }
+}
+
+function send(cmd){ 
+  if (ws && ws.readyState === WebSocket.OPEN) {
+    try {
+      ws.send(cmd);
+      console.log('Command sent:', cmd);
+    } catch (error) {
+      console.error('Failed to send command:', error);
+      commandQueue.push(cmd);
+    }
+  } else {
+    console.log('WebSocket not ready, queuing command:', cmd);
+    commandQueue.push(cmd);
+    if (!ws || ws.readyState === WebSocket.CLOSED) {
+      connect();
+    }
+  }
+}
+
+function disconnect() {
+  isManualClose = true;
+  stopHeartbeat();
+  if (ws) {
+    ws.close();
+  }
+}
 
 function fireCmd(btn,cmd){
   send(cmd);

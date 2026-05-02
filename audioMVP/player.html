@@ -32,11 +32,41 @@
 
       ws.onopen = () => {
         document.getElementById("status").innerText = "Connected";
+        console.log('WebSocket connected');
       };
 
       ws.onmessage = (event) => {
-        handle(event.data.trim());
+        const message = event.data.trim();
+        if (message === 'pong') {
+          // Heartbeat response
+          return;
+        }
+        handle(message);
       };
+
+      ws.onclose = (event) => {
+        console.log('WebSocket disconnected, code:', event.code, 'reason:', event.reason);
+        document.getElementById("status").innerText = "Disconnected - Retrying...";
+        
+        // Auto-reconnect with exponential backoff
+        setTimeout(() => {
+          if (!ws || ws.readyState === WebSocket.CLOSED) {
+            init();
+          }
+        }, 2000);
+      };
+
+      ws.onerror = (error) => {
+        console.error('WebSocket error:', error);
+        document.getElementById("status").innerText = "Connection error";
+      };
+
+      // Start heartbeat
+      setInterval(() => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+          ws.send('ping');
+        }
+      }, 30000);
     }
 
     function handle(cmd) {

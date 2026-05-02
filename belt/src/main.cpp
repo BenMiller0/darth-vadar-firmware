@@ -17,7 +17,7 @@
 // -----------------------------------------------------------------------------
 // LED CONFIGURATION ARRAY
 // -----------------------------------------------------------------------------
-// Parameter array for all LEDs. Includes pin #, delay, and mode settings.
+// Parameter array for belt LEDs only. Includes pin #, delay, and mode settings.
 // The configuration adapts based on NORMAL_MODE vs VOLATILE_BLINKING mode.
 static LedTaskParams ledParams[NUM_LEDS] = {
     // Left Belt LEDs
@@ -27,11 +27,7 @@ static LedTaskParams ledParams[NUM_LEDS] = {
     // Right Belt LEDs
     {R_BELT_RED,        R_BELT_RED_DELAY,       NORMAL_MODE ? 1 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.1f : R_BELT_RED_VOLATILITY,        R_BELT_RED_BRIGHTNESS},
     {R_BELT_GREEN_0,    R_BELT_GREEN_0_DELAY,   NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.0f : R_BELT_GREEN_0_VOLATILITY,    R_BELT_GREEN_0_BRIGHTNESS},
-    {R_BELT_GREEN_1,    R_BELT_GREEN_1_DELAY,   NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.0f : R_BELT_GREEN_1_VOLATILITY,    R_BELT_GREEN_1_BRIGHTNESS},
-    // Chest LEDs
-    {CHEST_RED_1,       CHEST_RED_1_DELAY,      NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.05f : CHEST_RED_1_VOLATILITY,       CHEST_RED_1_BRIGHTNESS},
-    {CHEST_RED_2,       CHEST_RED_2_DELAY,      NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.05f : CHEST_RED_2_VOLATILITY,       CHEST_RED_2_BRIGHTNESS},
-    {CHEST_RED_3,       CHEST_RED_3_DELAY,      NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.05f : CHEST_RED_3_VOLATILITY,       CHEST_RED_3_BRIGHTNESS}
+    {R_BELT_GREEN_1,    R_BELT_GREEN_1_DELAY,   NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.0f : R_BELT_GREEN_1_VOLATILITY,    R_BELT_GREEN_1_BRIGHTNESS}
 };
 
 // Touch sensor brightness control
@@ -52,7 +48,7 @@ void setup() {
 #if ENABLE_SERIAL_OUTPUT
     Serial.begin(115200);
     delay(1000); // Wait for serial to be ready
-    Serial.println("LED Blink Controller Starting...");
+    Serial.println("Belt LED Blink Controller Starting...");
 #endif
     
 #if ENABLE_MEMORY_PROFILING
@@ -82,7 +78,7 @@ void setup() {
     runTestMode();
 #else
 #if ENABLE_SERIAL_OUTPUT
-    Serial.println("NORMAL MODE - Initializing LED tasks");
+    Serial.println("NORMAL MODE - Initializing belt LED tasks");
 #endif
     
     // Always initialize PWM pins for brightness control
@@ -92,7 +88,7 @@ void setup() {
     TaskHandle_t ledTaskHandles[NUM_LEDS];
     for (int i = 0; i < NUM_LEDS; i++) {
         char taskName[20];
-        sprintf(taskName, "LED%d", i);
+        sprintf(taskName, "BeltLED%d", i);
         xTaskCreate(
             ledBlinkTask, 
             taskName,

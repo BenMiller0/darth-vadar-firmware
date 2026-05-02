@@ -383,10 +383,24 @@
 let ws;
 let reconnectAttempts = 0;
 let maxReconnectAttempts = 10;
-let baseReconnectDelay = 1000;
+let baseReconnectDelay = 2000;
 let commandQueue = [];
 let heartbeatInterval = null;
 let isManualClose = false;
+let pendingCommands = new Map(); // Track command acknowledgments
+let connectionHealth = {
+  lastPing: 0,
+  latency: 0,
+  uptime: 0,
+  commandsSent: 0,
+  commandsAcked: 0,
+  errors: 0
+};
+
+// Command cooldown system
+let globalCooldown = 0; // Global cooldown timestamp
+let globalCooldownDuration = 2000; // 2 seconds for all commands
+let activeProgressBar = null; // Track current progress bar
 
 function connect(){
   if (ws && (ws.readyState === WebSocket.CONNECTING || ws.readyState === WebSocket.OPEN)) {
@@ -444,9 +458,37 @@ function connect(){
   };
   
   ws.onmessage=(event)=>{
-    if (event.data === 'pong') {
-      // Heartbeat response received
-      return;
+    try {
+      const data = JSON.parse(event.data);
+      
+      if (data.type === 'pong') {
+        connectionHealth.latency = Date.now() - connectionHealth.lastPing;
+        console.log('Ping response, latency:', connectionHealth.latency + 'ms');
+        return;
+      }
+      
+      if (data.type === 'ack') {
+        if (pendingCommands.has(data.id)) {
+          const cmd = pendingCommands.get(data.id);
+          console.log('Command acknowledged:', cmd.command, 'ID:', data.id);
+          pendingCommands.delete(data.id);
+          connectionHealth.commandsAcked++;
+        }
+        return;
+      }
+      
+      if (data.type === 'health') {
+        // Update connection health from server
+        Object.assign(connectionHealth, data.health);
+        return;
+      }
+      
+    } catch (e) {
+      // Handle plain text messages (backward compatibility)
+      if (event.data === 'pong') {
+        connectionHealth.latency = Date.now() - connectionHealth.lastPing;
+        return;
+      }
     }
   };
 }
@@ -455,10 +497,51 @@ function startHeartbeat() {
   stopHeartbeat();
   heartbeatInterval = setInterval(() => {
     if (ws && ws.readyState === WebSocket.OPEN) {
-      ws.send('ping');
+      connectionHealth.lastPing = Date.now();
+      ws.send(JSON.stringify({ type: 'ping', timestamp: connectionHealth.lastPing }));
     }
   }, 30000); // Send ping every 30 seconds
 }
+
+// Network status detection
+window.addEventListener('online', () => {
+  console.log('Network connection restored');
+  if (!ws || ws.readyState === WebSocket.CLOSED) {
+    connect();
+  }
+});
+
+window.addEventListener('offline', () => {
+  console.log('Network connection lost');
+  document.getElementById('statusDot').className='status-dot disconnected';
+  const t=document.getElementById('status');
+  t.textContent='NETWORK OFFLINE'; t.className='status-text disconnected';
+  if (ws) {
+    ws.close();
+  }
+});
+
+// Connection quality indicator
+function updateConnectionQuality() {
+  const quality = getConnectionQuality();
+  const statusReadout = document.getElementById('lastCmd');
+  const successRate = connectionHealth.commandsSent > 0 
+    ? Math.round((connectionHealth.commandsAcked / connectionHealth.commandsSent) * 100)
+    : 100;
+  
+  statusReadout.textContent = `LATENCY: ${connectionHealth.latency}ms | SUCCESS: ${successRate}% | QUALITY: ${quality}`;
+}
+
+function getConnectionQuality() {
+  if (connectionHealth.latency === 0) return 'UNKNOWN';
+  if (connectionHealth.latency < 50) return 'EXCELLENT';
+  if (connectionHealth.latency < 100) return 'GOOD';
+  if (connectionHealth.latency < 200) return 'FAIR';
+  return 'POOR';
+}
+
+// Update connection quality every 5 seconds
+setInterval(updateConnectionQuality, 5000);
 
 function stopHeartbeat() {
   if (heartbeatInterval) {
@@ -470,11 +553,34 @@ function stopHeartbeat() {
 function send(cmd){ 
   if (ws && ws.readyState === WebSocket.OPEN) {
     try {
-      ws.send(cmd);
-      console.log('Command sent:', cmd);
+      // Add command ID for acknowledgment tracking
+      const cmdId = Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+      const message = JSON.stringify({ type: 'cmd', id: cmdId, command: cmd });
+      
+      ws.send(message);
+      console.log('Command sent:', cmd, 'ID:', cmdId);
+      connectionHealth.commandsSent++;
+      
+      // Track for acknowledgment
+      pendingCommands.set(cmdId, {
+        command: cmd,
+        timestamp: Date.now(),
+        retryCount: 0
+      });
+      
+      // Set timeout for acknowledgment
+      setTimeout(() => {
+        if (pendingCommands.has(cmdId)) {
+          console.warn('Command not acknowledged:', cmd, 'ID:', cmdId);
+          pendingCommands.delete(cmdId);
+          connectionHealth.errors++;
+        }
+      }, 5000); // 5 second timeout
+      
     } catch (error) {
       console.error('Failed to send command:', error);
       commandQueue.push(cmd);
+      connectionHealth.errors++;
     }
   } else {
     console.log('WebSocket not ready, queuing command:', cmd);
@@ -494,12 +600,89 @@ function disconnect() {
 }
 
 function fireCmd(btn,cmd){
+  // Check global cooldown
+  const now = Date.now();
+  
+  if (now < globalCooldown) {
+    const remainingTime = Math.ceil((globalCooldown - now) / 1000);
+    console.log(`Global cooldown active, ${remainingTime}s remaining`);
+    
+    // Simple visual feedback - just disable button briefly
+    btn.disabled = true;
+    btn.style.opacity = '0.6';
+    setTimeout(() => {
+      btn.disabled = false;
+      btn.style.opacity = '';
+    }, 300);
+    return;
+  }
+  
+  // Execute command
   send(cmd);
   document.getElementById('lastCmd').textContent=`LAST CMD: ${cmd}`;
+  
+  // Set global cooldown
+  globalCooldown = now + globalCooldownDuration;
+  
+  // Visual feedback
   btn.classList.remove('ripple');
   void btn.offsetWidth;
   btn.classList.add('ripple');
   setTimeout(()=>btn.classList.remove('ripple'),400);
+  
+  // Remove existing progress bar if any
+  if (activeProgressBar) {
+    activeProgressBar.remove();
+  }
+  
+  // Global cooldown progress bar
+  const progressBar = document.createElement('div');
+  progressBar.style.cssText = `
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 200px;
+    height: 8px;
+    background: rgba(255, 136, 0, 0.2);
+    border-radius: 4px;
+    overflow: hidden;
+    pointer-events: none;
+    z-index: 1000;
+    border: 1px solid var(--amber);
+    box-shadow: 0 0 20px rgba(255, 136, 0, 0.5);
+  `;
+  
+  const progressFill = document.createElement('div');
+  progressFill.style.cssText = `
+    height: 100%;
+    background: linear-gradient(90deg, var(--amber), var(--red-glow));
+    width: 0%;
+    transition: width 0.1s linear;
+    box-shadow: 0 0 10px rgba(255, 136, 0, 0.8);
+  `;
+  
+  progressBar.appendChild(progressFill);
+  document.body.appendChild(progressBar);
+  activeProgressBar = progressBar;
+  
+  // Animate progress bar
+  const startTime = Date.now();
+  const updateProgress = () => {
+    const elapsed = Date.now() - startTime;
+    const progress = Math.min(elapsed / globalCooldownDuration, 1);
+    
+    progressFill.style.width = (progress * 100) + '%';
+    
+    if (progress < 1) {
+      requestAnimationFrame(updateProgress);
+    } else {
+      progressBar.remove();
+      activeProgressBar = null;
+    }
+  };
+  
+  requestAnimationFrame(updateProgress);
 }
 
 function startBreathing(btn){
@@ -511,6 +694,7 @@ function stopBreathing(btn){
   fireCmd(btn,'STOP');
   document.getElementById('breathSection').classList.remove('breathing-active');
 }
+
 
 connect();
 </script>

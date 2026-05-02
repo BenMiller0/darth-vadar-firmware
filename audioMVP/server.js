@@ -85,26 +85,59 @@ wss.on('connection', (ws, req) => {
   });
 
   ws.on('message', (msg) => {
-    const message = msg.toString().trim();
-    
-    // Handle ping messages from client
-    if (message === 'ping') {
-      ws.send('pong');
-      return;
+    let message;
+    try {
+      message = JSON.parse(msg.toString().trim());
+    } catch (e) {
+      // Handle plain text messages (backward compatibility)
+      message = msg.toString().trim();
     }
     
-    console.log('Received command:', message);
-    
-    // broadcast to all clients (player phones)
-    wss.clients.forEach(client => {
-      if (client.readyState === WebSocket.OPEN) {
-        try {
-          client.send(message);
-        } catch (error) {
-          console.error('Failed to send message to client:', error);
-        }
+    // Handle different message types
+    if (typeof message === 'object') {
+      if (message.type === 'ping') {
+        ws.send(JSON.stringify({ type: 'pong', timestamp: Date.now() }));
+        return;
       }
-    });
+      
+      if (message.type === 'cmd') {
+        console.log('Received command:', message.command, 'ID:', message.id);
+        
+        // Send acknowledgment
+        ws.send(JSON.stringify({ type: 'ack', id: message.id }));
+        
+        // Broadcast to all clients (player phones)
+        wss.clients.forEach(client => {
+          if (client.readyState === WebSocket.OPEN) {
+            try {
+              client.send(message.command); // Send plain text to players for compatibility
+            } catch (error) {
+              console.error('Failed to send message to client:', error);
+            }
+          }
+        });
+        return;
+      }
+    } else {
+      // Handle plain text messages (backward compatibility)
+      if (message === 'ping') {
+        ws.send('pong');
+        return;
+      }
+      
+      console.log('Received command:', message);
+      
+      // broadcast to all clients (player phones)
+      wss.clients.forEach(client => {
+        if (client.readyState === WebSocket.OPEN) {
+          try {
+            client.send(message);
+          } catch (error) {
+            console.error('Failed to send message to client:', error);
+          }
+        }
+      });
+    }
   });
 
   ws.on('close', (code, reason) => {

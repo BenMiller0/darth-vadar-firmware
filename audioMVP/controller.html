@@ -476,6 +476,12 @@ function connect(){
         if (pendingCommands.has(data.id)) {
           const cmd = pendingCommands.get(data.id);
           console.log('Command acknowledged:', cmd.command, 'ID:', data.id, 'Retries:', cmd.retryCount);
+          
+          // Clear timeout if exists
+          if (cmd.timeoutId) {
+            clearTimeout(cmd.timeoutId);
+          }
+          
           pendingCommands.delete(data.id);
           connectionHealth.commandsAcked++;
           
@@ -578,7 +584,7 @@ function send(cmd){
       });
       
       // Set timeout for acknowledgment and retry
-      setTimeout(() => {
+      const timeoutId = setTimeout(() => {
         if (pendingCommands.has(cmdId)) {
           const cmdData = pendingCommands.get(cmdId);
           console.warn('Command not acknowledged:', cmd, 'ID:', cmdId, 'Retries:', cmdData.retryCount);
@@ -601,28 +607,71 @@ function send(cmd){
                 if (pendingCommands.has(cmdId)) {
                   const retryData = pendingCommands.get(cmdId);
                   if (retryData.retryCount < maxRetries) {
-                    // Recursive retry
-                    send(cmd);
-                  } else {
-                    // Max retries reached, give up
-                    console.error('Command failed after max retries:', cmd, 'ID:', cmdId);
-                    pendingCommands.delete(cmdId);
-                    connectionHealth.errors++;
+                    // Retry again with same ID
+                    retryData.retryCount++;
+                    retryData.timestamp = Date.now();
                     
-                    // Show error to user
-                    showErrorIndicator(cmd);
+                    const retryMessage2 = JSON.stringify({ type: 'cmd', id: cmdId, command: cmd, retry: true });
+                    if (ws && ws.readyState === WebSocket.OPEN) {
+                      ws.send(retryMessage2);
+                      connectionHealth.commandsSent++;
+                      
+                      setTimeout(() => {
+                        if (pendingCommands.has(cmdId)) {
+                          const retryData2 = pendingCommands.get(cmdId);
+                          if (retryData2.retryCount < maxRetries) {
+                            retryData2.retryCount++;
+                            retryData2.timestamp = Date.now();
+                            
+                            const retryMessage3 = JSON.stringify({ type: 'cmd', id: cmdId, command: cmd, retry: true });
+                            if (ws && ws.readyState === WebSocket.OPEN) {
+                              ws.send(retryMessage3);
+                              connectionHealth.commandsSent++;
+                              
+                              setTimeout(() => {
+                                if (pendingCommands.has(cmdId)) {
+                                  console.error('Command failed after all retries:', cmd, 'ID:', cmdId);
+                                  pendingCommands.delete(cmdId);
+                                  connectionHealth.errors++;
+                                  showErrorIndicator(cmd);
+                                }
+                              }, retryDelay);
+                            } else {
+                              console.error('Command failed after max retries:', cmd, 'ID:', cmdId);
+                              pendingCommands.delete(cmdId);
+                              connectionHealth.errors++;
+                              showErrorIndicator(cmd);
+                            }
+                          }
+                        }
+                      }, retryDelay);
+                    } else {
+                      console.error('Command failed after max retries:', cmd, 'ID:', cmdId);
+                      pendingCommands.delete(cmdId);
+                      connectionHealth.errors++;
+                      showErrorIndicator(cmd);
+                    }
                   }
                 }
               }, retryDelay);
+            } else {
+              console.error('WebSocket not ready for retry:', cmd);
+              pendingCommands.delete(cmdId);
+              connectionHealth.errors++;
+              showErrorIndicator(cmd);
             }
           } else {
             // Max retries reached
+            console.error('Command failed after max retries:', cmd, 'ID:', cmdId);
             pendingCommands.delete(cmdId);
             connectionHealth.errors++;
             showErrorIndicator(cmd);
           }
         }
       }, 3000); // 3 second timeout for acknowledgment
+      
+      // Store timeout ID for cleanup
+      pendingCommands.get(cmdId).timeoutId = timeoutId;
       
     } catch (error) {
       console.error('Failed to send command:', error);

@@ -764,10 +764,11 @@ function fireCmd(btn,cmd){
   send(cmd);
   document.getElementById('lastCmd').textContent=`LAST CMD: ${cmd}`;
   
-  // Set global cooldown based on audio duration
-  const cooldownTime = audioDurations[cmd] || globalCooldownDuration;
+  // Set global cooldown based on audio duration + 1 second buffer
+  const baseDuration = audioDurations[cmd] || globalCooldownDuration;
+  const cooldownTime = baseDuration + 1000; // Add 1 second buffer
   globalCooldown = now + cooldownTime;
-  console.log(`Cooldown set to ${cooldownTime}ms for command ${cmd}`);
+  console.log(`Cooldown set to ${cooldownTime}ms (${baseDuration}ms audio + 1000ms buffer) for command ${cmd}`);
   
   // Visual feedback
   btn.classList.remove('ripple');

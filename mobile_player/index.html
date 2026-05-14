@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>VADER AUDIO COMMAND</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Share+Tech+Mono&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --black: #000;
+      --red: #cc1111;
+      --red-dim: #5a0a0a;
+      --red-mid: #881111;
+      --red-glow: rgba(204,17,17,0.35);
+      --green: #00ff41;
+      --text: #bdbdbd;
+      --text-dim: #555;
+    }
+
+    * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+
+    html, body {
+      background: var(--black);
+      color: var(--text);
+      font-family: 'Orbitron', sans-serif;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background: repeating-linear-gradient(
+        0deg, transparent, transparent 3px,
+        rgba(0,0,0,0.13) 3px, rgba(0,0,0,0.13) 4px
+      );
+      pointer-events: none;
+      z-index: 999;
+    }
+
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background: radial-gradient(ellipse at center, transparent 45%, rgba(0,0,0,0.75) 100%);
+      pointer-events: none;
+      z-index: 998;
+    }
+
+    .container {
+      max-width: 430px;
+      margin: 0 auto;
+      padding: 16px 16px 32px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* HEADER */
+    .header {
+      text-align: center;
+      padding: 20px 0 18px;
+      border-bottom: 1px solid var(--red-dim);
+      margin-bottom: 20px;
+    }
+
+    .imperial-crest { width:56px; height:56px; margin:0 auto 12px; display:block; }
+
+    .header-eyebrow {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px; letter-spacing: 6px; color: var(--red-mid); margin-bottom: 5px;
+    }
+
+    .header-title {
+      font-size: 28px; font-weight: 900; letter-spacing: 6px; color: #fff;
+      text-shadow: 0 0 18px var(--red), 0 0 40px rgba(204,17,17,0.4);
+    }
+
+    .header-sub {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px; color: var(--text-dim); letter-spacing: 3px; margin-top: 6px;
+    }
+
+    /* STATUS BAR */
+    .status-bar {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 9px; color: var(--text-dim);
+      display: flex; justify-content: space-between;
+      padding: 7px 0; border-bottom: 1px solid #161616;
+      margin-bottom: 26px; letter-spacing: 1px;
+    }
+    .live-dot { color: var(--green); animation: blink 1.6s infinite; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    /* SECTION LABELS */
+    .section-label {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 8px; letter-spacing: 5px; color: var(--red-dim);
+      text-transform: uppercase; margin-bottom: 10px;
+      display: flex; align-items: center; gap: 8px;
+    }
+    .section-label::before, .section-label::after {
+      content: ''; flex: 1; height: 1px; background: var(--red-dim);
+    }
+
+    /* BREATHING */
+    .breathing-section { margin-bottom: 28px; }
+
+    .breathing-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .btn-breathe {
+      padding: 18px 10px;
+      background: transparent;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 8px; font-weight: 700; letter-spacing: 1.5px;
+      text-transform: uppercase; cursor: pointer; line-height: 1.6;
+      transition: all 0.18s;
+      clip-path: polygon(8px 0%, 100% 0%, calc(100% - 8px) 100%, 0% 100%);
+      border: none; outline: none;
+    }
+    .btn-breathe:active { transform: scale(0.96); }
+
+    .btn-initiate {
+      color: var(--green);
+      box-shadow: inset 0 0 0 1px #004d1a;
+      background: rgba(0,255,65,0.03);
+    }
+    .btn-initiate:hover, .btn-initiate.is-active {
+      background: rgba(0,255,65,0.09);
+      box-shadow: inset 0 0 0 1px var(--green), 0 0 18px rgba(0,255,65,0.25);
+    }
+
+    .btn-terminate {
+      color: var(--red);
+      box-shadow: inset 0 0 0 1px var(--red-dim);
+      background: rgba(204,17,17,0.03);
+    }
+    .btn-terminate:hover {
+      background: rgba(204,17,17,0.09);
+      box-shadow: inset 0 0 0 1px var(--red), 0 0 18px var(--red-glow);
+    }
+
+    /* Breath waveform */
+    .breath-viz {
+      display: flex; align-items: center; justify-content: center;
+      gap: 4px; height: 38px; margin-top: 14px;
+    }
+    .bbar { width: 3px; border-radius: 1px; background: var(--red-dim); transition: background 0.3s; }
+    .bbar:nth-child(1)  { height:6px;  --d:0s   }
+    .bbar:nth-child(2)  { height:12px; --d:.1s  }
+    .bbar:nth-child(3)  { height:18px; --d:.2s  }
+    .bbar:nth-child(4)  { height:26px; --d:.3s  }
+    .bbar:nth-child(5)  { height:32px; --d:.4s  }
+    .bbar:nth-child(6)  { height:36px; --d:.5s  }
+    .bbar:nth-child(7)  { height:32px; --d:.6s  }
+    .bbar:nth-child(8)  { height:26px; --d:.7s  }
+    .bbar:nth-child(9)  { height:18px; --d:.8s  }
+    .bbar:nth-child(10) { height:12px; --d:.9s  }
+    .bbar:nth-child(11) { height:6px;  --d:1.0s }
+    .breath-viz.is-active .bbar {
+      background: var(--red);
+      animation: wavebar 2.5s ease-in-out var(--d) infinite;
+    }
+    @keyframes wavebar {
+      0%,100% { transform:scaleY(0.25); filter:brightness(0.6); }
+      50%      { transform:scaleY(1.2);  filter:brightness(1.4) drop-shadow(0 0 4px var(--red)); }
+    }
+
+    /* PHRASE BUTTONS */
+    .phrases-section { margin-bottom: 28px; }
+    .phrases-grid { display: grid; grid-template-columns: 1fr; gap: 5px; }
+
+    .btn-phrase {
+      padding: 13px 14px 13px 20px;
+      border: none;
+      border-left: 2px solid var(--red-dim);
+      background: #060606;
+      color: var(--text);
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 10.5px; letter-spacing: 1.5px;
+      cursor: pointer; text-align: left; text-transform: uppercase;
+      position: relative; overflow: hidden; transition: all 0.14s; outline: none;
+    }
+    .btn-phrase::before {
+      content: '▸'; position: absolute; left: 7px;
+      color: var(--red-dim); font-size: 9px; transition: color 0.14s;
+    }
+    .btn-phrase:hover { border-left-color: var(--red); background: #0c0000; color: #fff; }
+    .btn-phrase:hover::before { color: var(--red); }
+    .btn-phrase:active { transform: scale(0.99); }
+
+    .btn-phrase.is-playing {
+      border-left-color: var(--red);
+      background: rgba(204,17,17,0.07);
+      color: #fff;
+      animation: playing-pulse 0.6s ease-in-out infinite alternate;
+    }
+    .btn-phrase.is-playing::before { color: var(--red); }
+    @keyframes playing-pulse {
+      from { box-shadow: -3px 0 10px rgba(204,17,17,0.2); }
+      to   { box-shadow: -3px 0 24px rgba(204,17,17,0.55); }
+    }
+
+    /* BINARY RESPONSE */
+    .binary-section { margin-bottom: 16px; }
+    .binary-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .btn-binary {
+      padding: 20px 10px;
+      border: none; background: transparent;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 15px; font-weight: 900; letter-spacing: 4px;
+      cursor: pointer; text-transform: uppercase; transition: all 0.18s;
+      position: relative; color: var(--red);
+      box-shadow: inset 0 0 0 1px var(--red-dim);
+      clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+      outline: none;
+    }
+    .btn-binary .dia { display:block; font-size:10px; margin-bottom:5px; color:var(--red-dim); letter-spacing:0; }
+    .btn-binary:hover {
+      background: rgba(204,17,17,0.1);
+      box-shadow: inset 0 0 0 1px var(--red), 0 0 22px var(--red-glow);
+      color: #fff;
+    }
+    .btn-binary:hover .dia { color: var(--red); }
+    .btn-binary:active { transform: scale(0.94); }
+    .btn-binary.is-playing {
+      background: rgba(204,17,17,0.1);
+      box-shadow: inset 0 0 0 1px var(--red), 0 0 22px var(--red-glow);
+      color: #fff;
+    }
+    .btn-binary.is-playing .dia { color: var(--red); }
+
+    /* FOOTER */
+    .footer { text-align:center; padding:18px 0 0; border-top:1px solid #111; }
+    .footer-text { font-family:'Share Tech Mono',monospace; font-size:8px; color:#2a2a2a; letter-spacing:3px; }
+
+    /* RIPPLE */
+    .ripple {
+      position:absolute; border-radius:50%;
+      background:rgba(204,17,17,0.25);
+      transform:scale(0); animation:ripple-anim 0.55s linear; pointer-events:none;
+    }
+    @keyframes ripple-anim { to { transform:scale(4); opacity:0; } }
+  </style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <svg class="imperial-crest" viewBox="0 0 56 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <circle cx="28" cy="28" r="26.5" stroke="#5a0a0a" stroke-width="1.4"/>
+      <circle cx="28" cy="28" r="11"   stroke="#5a0a0a" stroke-width="1"/>
+      <circle cx="28" cy="28" r="4.5"  fill="#5a0a0a"/>
+      <line x1="28" y1="1.5"  x2="28"   y2="17"   stroke="#5a0a0a" stroke-width="1.4"/>
+      <line x1="28" y1="39"   x2="28"   y2="54.5"  stroke="#5a0a0a" stroke-width="1.4"/>
+      <line x1="1.5" y1="28"  x2="17"   y2="28"   stroke="#5a0a0a" stroke-width="1.4"/>
+      <line x1="39"  y1="28"  x2="54.5" y2="28"   stroke="#5a0a0a" stroke-width="1.4"/>
+      <line x1="9.5"  y1="9.5"  x2="20"   y2="20"   stroke="#5a0a0a" stroke-width="1"/>
+      <line x1="36"   y1="36"   x2="46.5" y2="46.5" stroke="#5a0a0a" stroke-width="1"/>
+      <line x1="46.5" y1="9.5"  x2="36"   y2="20"   stroke="#5a0a0a" stroke-width="1"/>
+      <line x1="20"   y1="36"   x2="9.5"  y2="46.5" stroke="#5a0a0a" stroke-width="1"/>
+      <circle cx="28"   cy="1.5"  r="1.8" fill="#5a0a0a"/>
+      <circle cx="28"   cy="54.5" r="1.8" fill="#5a0a0a"/>
+      <circle cx="1.5"  cy="28"   r="1.8" fill="#5a0a0a"/>
+      <circle cx="54.5" cy="28"   r="1.8" fill="#5a0a0a"/>
+    </svg>
+    <div class="header-eyebrow">GALACTIC EMPIRE</div>
+    <div class="header-title">VADER</div>
+    <div class="header-sub">AUDIO COMMAND INTERFACE // REV 4.7</div>
+  </div>
+
+  <!-- STATUS BAR -->
+  <div class="status-bar">
+    <span>SYS: ONLINE</span>
+    <span class="live-dot">● LIVE</span>
+    <span>DARK SIDE: ACTIVE</span>
+  </div>
+
+  <!-- BREATHING -->
+  <div class="breathing-section">
+    <div class="section-label">RESPIRATORY SYSTEM</div>
+    <div class="breathing-controls">
+      <button class="btn-breathe btn-initiate" id="btnInitiate" onclick="startBreathing()">
+        ▶ INITIATE<br>BREATHING
+      </button>
+      <button class="btn-breathe btn-terminate" onclick="stopBreathing()">
+        ■ TERMINATE<br>BREATHING
+      </button>
+    </div>
+    <div class="breath-viz" id="breathViz">
+      <div class="bbar"></div><div class="bbar"></div><div class="bbar"></div>
+      <div class="bbar"></div><div class="bbar"></div><div class="bbar"></div>
+      <div class="bbar"></div><div class="bbar"></div><div class="bbar"></div>
+      <div class="bbar"></div><div class="bbar"></div>
+    </div>
+  </div>
+
+  <!-- PHRASES -->
+  <div class="phrases-section">
+    <div class="section-label">PHRASE DISPATCH</div>
+    <div class="phrases-grid" id="phrasesGrid"></div>
+  </div>
+
+  <!-- BINARY RESPONSE -->
+  <div class="binary-section">
+    <div class="section-label">BINARY RESPONSE</div>
+    <div class="binary-grid">
+      <button class="btn-binary" id="btnYes" onclick="playBinary('yes')">
+        <span class="dia">◆</span>YES
+      </button>
+      <button class="btn-binary" id="btnNo" onclick="playBinary('no')">
+        <span class="dia">◆</span>NO
+      </button>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-text">// IMPERIAL AUDIO COMMAND // CLASSIFIED //</div>
+  </div>
+
+</div>
+
+<!-- AUDIO — keep all MP3s in the same folder as this HTML file -->
+<audio id="snd-breathing"  src="audio/breathing.mp3"                                                     loop></audio>
+<audio id="snd-darkside"   src="audio/youwillfalltothepowerofthedarkside.mp3"></audio>
+<audio id="snd-comeforyou" src="audio/ihavecomeforyou.mp3"></audio>
+<audio id="snd-impressive" src="audio/mostimpressive.mp3"></audio>
+<audio id="snd-shallsee"   src="audio/weshallsee.mp3"></audio>
+<audio id="snd-convenient" src="audio/howconvenient.mp3"></audio>
+<audio id="snd-delusion"   src="audio/itisdelusiontothinkyouractionshavehadanyconsequence.mp3"></audio>
+<audio id="snd-soweak"     src="audio/soweak.mp3"></audio>
+<audio id="snd-archive"    src="audio/thisarchivewillburn!.mp3"></audio>
+<audio id="snd-noescape"   src="audio/youshallnotescapemethistime.mp3"></audio>
+<audio id="snd-wastetime"  src="audio/youwastetime.mp3"></audio>
+<audio id="snd-yes"        src="audio/yes.mp3"></audio>
+<audio id="snd-no"         src="audio/no.mp3"></audio>
+
+<script>
+  // ── PHRASE CONFIG ──────────────────────────────────────────────────
+  const PHRASES = [
+    { label: 'YOU WILL FALL TO THE POWER OF THE DARK SIDE', id: 'snd-darkside'   },
+    { label: 'I HAVE COME FOR YOU',                          id: 'snd-comeforyou' },
+    { label: 'MOST IMPRESSIVE',                              id: 'snd-impressive' },
+    { label: 'WE SHALL SEE',                                 id: 'snd-shallsee'   },
+    { label: 'HOW CONVENIENT',                               id: 'snd-convenient' },
+    { label: 'IT IS DELUSION',                               id: 'snd-delusion'   },
+    { label: 'SO WEAK',                                      id: 'snd-soweak'     },
+    { label: 'THIS ARCHIVE WILL BURN',                       id: 'snd-archive'    },
+    { label: 'YOU SHALL NOT ESCAPE',                         id: 'snd-noescape'   },
+    { label: 'YOU WASTE TIME',                               id: 'snd-wastetime'  },
+  ];
+
+  // Build phrase buttons dynamically
+  const grid = document.getElementById('phrasesGrid');
+  PHRASES.forEach(({ label, id }) => {
+    const btn = document.createElement('button');
+    btn.className = 'btn-phrase';
+    btn.textContent = label;
+    btn.dataset.soundId = id;
+    btn.addEventListener('click', function(e) {
+      addRipple(this, e);
+      playPhrase(this);
+    });
+    grid.appendChild(btn);
+  });
+
+  // ── BREATHING ─────────────────────────────────────────────────────
+  const breathAudio = document.getElementById('snd-breathing');
+  const breathViz   = document.getElementById('breathViz');
+  const btnInitiate = document.getElementById('btnInitiate');
+
+  breathAudio.volume = 0.5;
+  breathAudio.loop = true;
+
+  // Belt-and-suspenders: if the browser fires 'ended' while still active, restart
+  let breathActive = false;
+  breathAudio.addEventListener('ended', () => {
+    if (breathActive) { breathAudio.currentTime = 0; breathAudio.play(); }
+  });
+
+  function startBreathing() {
+    breathActive = true;
+    breathAudio.currentTime = 0;
+    breathAudio.play();
+    breathViz.classList.add('is-active');
+    btnInitiate.classList.add('is-active');
+  }
+
+  function stopBreathing() {
+    breathActive = false;
+    breathAudio.pause();
+    breathAudio.currentTime = 0;
+    breathViz.classList.remove('is-active');
+    btnInitiate.classList.remove('is-active');
+  }
+
+  // ── PHRASE PLAYBACK ────────────────────────────────────────────────
+  function playPhrase(btn) {
+    const audio = document.getElementById(btn.dataset.soundId);
+    if (!audio) return;
+
+    // Stop any other phrase that's playing
+    PHRASES.forEach(({ id }) => {
+      const a = document.getElementById(id);
+      if (a && a !== audio) { a.pause(); a.currentTime = 0; }
+    });
+    document.querySelectorAll('.btn-phrase').forEach(b => b.classList.remove('is-playing'));
+
+    audio.currentTime = 0;
+    audio.play();
+    btn.classList.add('is-playing');
+
+    audio.onended = () => btn.classList.remove('is-playing');
+  }
+
+  // ── BINARY RESPONSE ───────────────────────────────────────────────
+  function playBinary(which) {
+    const audio = document.getElementById('snd-' + which);
+    const btn   = document.getElementById('btn' + which.charAt(0).toUpperCase() + which.slice(1));
+    if (!audio) return;
+    audio.currentTime = 0;
+    audio.play();
+    btn.classList.add('is-playing');
+    audio.onended = () => btn.classList.remove('is-playing');
+  }
+
+  // ── RIPPLE ────────────────────────────────────────────────────────
+  function addRipple(el, e) {
+    const r    = document.createElement('span');
+    const rect = el.getBoundingClientRect();
+    const size = Math.max(rect.width, rect.height);
+    r.className = 'ripple';
+    r.style.cssText = `width:${size}px;height:${size}px;left:${e.clientX-rect.left-size/2}px;top:${e.clientY-rect.top-size/2}px`;
+    el.appendChild(r);
+    setTimeout(() => r.remove(), 600);
+  }
+
+  document.querySelectorAll('.btn-breathe, .btn-binary').forEach(btn => {
+    btn.addEventListener('click', e => addRipple(btn, e));
+  });
+</script>
+</body>
+</html>

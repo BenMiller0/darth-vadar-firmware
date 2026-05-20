@@ -352,6 +352,25 @@
       text-transform: uppercase;
     }
 
+
+    /* Hide legacy phrase grid; expanded bank is now the main phrase interface. */
+    .phrases-section {
+      display: none !important;
+    }
+
+    .bank-btn {
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+      cursor: pointer;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+
+    .bank-meta,
+    .bank-note {
+      display: none !important;
+    }
+
   </style>
 </head>
 <body>
@@ -429,11 +448,10 @@
 
   <!-- EXPANDED AUDIO BANK -->
   <div class="audio-bank-section">
-    <div class="section-label">EXPANDED AUDIO BANK</div>
+    <div class="section-label">AUDIO BANK</div>
     <input class="bank-search" id="bankSearch" type="search" placeholder="Search extra Vader lines..." autocomplete="off">
     <div class="bank-tabs" id="bankTabs"></div>
     <div class="bank-grid" id="bankGrid"></div>
-    <div class="bank-note">Existing core controls above remain show-safe.</div>
   </div>
 
   <!-- FOOTER -->
@@ -566,29 +584,29 @@
 <script>
   // ── COMPACT EXPANDED AUDIO BANK ─────────────────────────────────
   const EXTRA_CLIPS = [
-    { label: 'As You Wish', category: 'Quick', src: 'audio/QuickReactions/asyouwish.mp3' },
-    { label: 'Good', category: 'Quick', src: 'audio/QuickReactions/good.mp3' },
-    { label: 'Good Work', category: 'Quick', src: 'audio/QuickReactions/goodwork!.mp3' },
-    { label: 'I Have You Now', category: 'Quick', src: 'audio/QuickReactions/ihaveyounow.mp3' },
-    { label: 'Impressive', category: 'Quick', src: 'audio/QuickReactions/impressive!.mp3' },
-    { label: 'Most Impressive', category: 'Quick', src: 'audio/QuickReactions/mostimpressive.mp3' },
-    { label: 'No', category: 'Quick', src: 'audio/QuickReactions/no.mp3' },
-    { label: 'That Is Correct', category: 'Quick', src: 'audio/QuickReactions/Thatiscorrect.mp3' },
+    { label: 'As You Wish', category: 'Pinned', src: 'audio/QuickReactions/asyouwish.mp3' },
+    { label: 'Good', category: 'Pinned', src: 'audio/QuickReactions/good.mp3' },
+    { label: 'Good Work', category: 'Pinned', src: 'audio/QuickReactions/goodwork!.mp3' },
+    { label: 'I Have You Now', category: 'Pinned', src: 'audio/QuickReactions/ihaveyounow.mp3' },
+    { label: 'Impressive', category: 'Pinned', src: 'audio/QuickReactions/impressive!.mp3' },
+    { label: 'Most Impressive', category: 'Pinned', src: 'audio/QuickReactions/mostimpressive.mp3' },
+    { label: 'No', category: 'Pinned', src: 'audio/QuickReactions/no.mp3' },
+    { label: 'That Is Correct', category: 'Pinned', src: 'audio/QuickReactions/Thatiscorrect.mp3' },
     { label: "That’s It", category: 'Quick', src: 'audio/QuickReactions/thatsit!.mp3' },
     { label: 'The Force Is Strong With This One', category: 'Quick', src: 'audio/QuickReactions/theforceisstrongwiththisone.mp3' },
-    { label: 'We Shall See', category: 'Quick', src: 'audio/QuickReactions/weshallsee.mp3' },
-    { label: 'Yes', category: 'Quick', src: 'audio/QuickReactions/yes.mp3' },
+    { label: 'We Shall See', category: 'Pinned', src: 'audio/QuickReactions/weshallsee.mp3' },
+    { label: 'Yes', category: 'Pinned', src: 'audio/QuickReactions/yes.mp3' },
 
-    { label: 'I Have Come For You', category: 'Threats', src: 'audio/ThreatsIntimidation/ihavecomeforyou.mp3' },
-    { label: 'You Will Fall To The Power Of The Dark Side', category: 'Threats', src: 'audio/ThreatsIntimidation/youwillfalltothepowerofthedarkside.mp3' },
+    { label: 'I Have Come For You', category: 'Pinned', src: 'audio/ThreatsIntimidation/ihavecomeforyou.mp3' },
+    { label: 'You Will Fall To The Power Of The Dark Side', category: 'Pinned', src: 'audio/ThreatsIntimidation/youwillfalltothepowerofthedarkside.mp3' },
     { label: 'It Is Delusion', category: 'Threats', src: 'audio/ThreatsIntimidation/itisdelusiontothinkyouractionshavehadanyconsequence.mp3' },
     { label: 'Join Me And We Can Rule The Galaxy', category: 'Threats', src: 'audio/ThreatsIntimidation/joinmeandwecanrulethegalaxyasfatherandson.mp3' },
     { label: 'You Have Failed Me For The Last Time', category: 'Threats', src: 'audio/ThreatsIntimidation/youhavefailedmeforthelasttime.mp3' },
-    { label: 'Your End Is Near', category: 'Threats', src: 'audio/ThreatsIntimidation/yourendisnear.mp3' },
+    { label: 'Your End Is Near', category: 'Pinned', src: 'audio/ThreatsIntimidation/yourendisnear.mp3' },
     { label: 'Your Failure Is Inevitable', category: 'Threats', src: 'audio/ThreatsIntimidation/yourfailureisinevitable.mp3' },
     { label: 'Your Powers Are Weak Old Man', category: 'Threats', src: 'audio/ThreatsIntimidation/yourpowersareweakoldman.mp3' },
     { label: 'Your Time Is Over', category: 'Threats', src: 'audio/ThreatsIntimidation/yourtimeisover.mp3' },
-    { label: 'You Shall Not Escape Me This Time', category: 'Threats', src: 'audio/ThreatsIntimidation/youshallnotescapemethistime.mp3' },
+    { label: 'You Shall Not Escape Me This Time', category: 'Pinned', src: 'audio/ThreatsIntimidation/youshallnotescapemethistime.mp3' },
     { label: 'Technological Terror', category: 'Threats', src: 'audio/ThreatsIntimidation/dontbetooproudofthistechnologicalterroryouveconstructed.mp3' },
 
     { label: 'Hidden Rebel Base', category: 'Empire', src: 'audio/EmpireAuthority/andnowyourhighnesswewilldiscussthelocationofyourhiddenrebelbase.mp3' },
@@ -608,7 +626,7 @@
     { label: 'I Am Altering The Deal', category: 'Anger', src: 'audio/AngerDisappointment/iamalteringthedealprayidontalteritanyfurther.mp3' },
     { label: 'Lack Of Faith Disturbing', category: 'Anger', src: 'audio/AngerDisappointment/ifindyourlackoffaithdisturbing.mp3' },
     { label: "Being Treated Unfairly", category: 'Anger', src: 'audio/AngerDisappointment/perhapsyouthinkyourebeingtreatedunfairly.mp3' },
-    { label: 'You Waste Time', category: 'Anger', src: 'audio/AngerDisappointment/youwastetime.mp3' },
+    { label: 'You Waste Time', category: 'Pinned', src: 'audio/AngerDisappointment/youwastetime.mp3' },
 
     { label: "Don’t Make Me Destroy You", category: 'Action', src: 'audio/CombatAction/dontmakemedestroyyou.mp3' },
     { label: 'Join The Jedi In Death', category: 'Action', src: 'audio/CombatAction/jointhejediindeath!.mp3' },
@@ -617,17 +635,17 @@
 
     { label: 'Elusive', category: 'Misc', src: 'audio/Misc/elusive.mp3' },
     { label: 'Futile', category: 'Misc', src: 'audio/Misc/futile.mp3' },
-    { label: 'How Convenient', category: 'Misc', src: 'audio/Misc/howconvenient.mp3' },
+    { label: 'How Convenient', category: 'Pinned', src: 'audio/Misc/howconvenient.mp3' },
     { label: 'Pointless', category: 'Misc', src: 'audio/Misc/pointless!.mp3' },
-    { label: 'So Weak', category: 'Misc', src: 'audio/Misc/soweak.mp3' },
+    { label: 'So Weak', category: 'Pinned', src: 'audio/Misc/soweak.mp3' },
     { label: 'Submit', category: 'Misc', src: 'audio/Misc/submit!.mp3' },
     { label: 'Jedi Tradition Remnants', category: 'Misc', src: 'audio/Misc/youhavegatheredtheremnantsofthejeditradition.mp3' },
     { label: 'You Have Grown Stronger', category: 'Misc', src: 'audio/Misc/youhavegrownstronger.mp3' },
   ];
 
-  const BANK_CATEGORIES = ['Quick', 'Threats', 'Empire', 'Dark Side', 'Anger', 'Action', 'Misc', 'All'];
+  const BANK_CATEGORIES = ['Pinned', 'Threats', 'Empire', 'Dark Side', 'Anger', 'Action', 'Misc', 'All'];
   const bankAudioCache = new Map();
-  let bankActiveCategory = 'Quick';
+  let bankActiveCategory = 'Pinned';
   let bankActiveAudio = null;
   let bankWarmStarted = false;
 
@@ -648,7 +666,7 @@
     });
   }
 
-  document.addEventListener('pointerdown', warmBankAudio, { once: true });
+  // No global warm-up. Mobile playback stays tied to the actual button tap.
 
   function stopBankAudio() {
     if (bankActiveAudio) {
@@ -720,11 +738,15 @@
     clips.forEach(clip => {
       const btn = document.createElement('button');
       btn.className = 'bank-btn';
-      btn.innerHTML = `${clip.label}<span class="bank-meta">${clip.category}</span>`;
-      btn.addEventListener('click', e => {
-        if (typeof addRipple === 'function') addRipple(btn, e);
+      btn.textContent = clip.label;
+      const trigger = e => {
+        e.preventDefault();
         playBankClip(clip, btn);
-      });
+      };
+
+      btn.addEventListener('pointerup', trigger);
+      btn.addEventListener('touchend', trigger);
+      btn.addEventListener('click', trigger);
       grid.appendChild(btn);
     });
   }

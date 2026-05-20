@@ -241,123 +241,115 @@
     }
     @keyframes ripple-anim { to { transform:scale(4); opacity:0; } }
 
-    /* ── EXPANDED MOBILE PLAYER UI ───────────────────────────────── */
-    .quick-section,
-    .search-section,
-    .category-section {
-      margin-top: 14px;
+    /* ── COMPACT EXPANDED AUDIO BANK ─────────────────────────────── */
+    .audio-bank-section {
+      margin-top: 18px;
       padding: 14px;
-      border: 1px solid rgba(130, 20, 20, 0.55);
-      background: rgba(10, 10, 10, 0.82);
-      box-shadow: inset 0 0 18px rgba(120, 0, 0, 0.12);
+      border: 1px solid rgba(120, 0, 0, 0.7);
+      background: rgba(8, 8, 8, 0.88);
     }
 
-    .quick-grid {
-      display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
-      gap: 8px;
-    }
-
-    .search-input {
+    .bank-search {
       width: 100%;
-      padding: 14px 12px;
-      border: 1px solid rgba(120, 20, 20, 0.8);
-      background: #080808;
-      color: #f0e6d0;
+      min-height: 46px;
+      padding: 11px 12px;
+      border: 1px solid rgba(160, 0, 0, 0.85);
+      background: #050505;
+      color: #f4ead8;
       font: inherit;
+      font-size: 0.82rem;
       letter-spacing: 0.04em;
       outline: none;
+      margin-bottom: 10px;
     }
 
-    .search-input:focus {
-      border-color: #b31616;
-      box-shadow: 0 0 16px rgba(179, 22, 22, 0.35);
+    .bank-search:focus {
+      border-color: #ff2222;
+      box-shadow: 0 0 12px rgba(255, 0, 0, 0.25);
     }
 
-    .category-tabs {
+    .bank-tabs {
       display: flex;
-      gap: 7px;
+      gap: 6px;
       overflow-x: auto;
       padding-bottom: 8px;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
       -webkit-overflow-scrolling: touch;
     }
 
-    .category-tab {
+    .bank-tab {
       flex: 0 0 auto;
-      border: 1px solid rgba(120, 20, 20, 0.7);
+      min-height: 34px;
+      border: 1px solid rgba(120, 0, 0, 0.75);
       background: #080808;
-      color: #bcae99;
-      padding: 9px 10px;
+      color: #b9aa93;
+      padding: 7px 9px;
       font: inherit;
-      font-size: 0.68rem;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    .category-tab.is-active {
-      color: #fff2dc;
-      border-color: #d01b1b;
-      background: rgba(120, 0, 0, 0.38);
-      box-shadow: 0 0 12px rgba(180, 0, 0, 0.25);
-    }
-
-    .expanded-grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      gap: 8px;
-    }
-
-    .btn-clip {
-      position: relative;
-      overflow: hidden;
-      width: 100%;
-      min-height: 48px;
-      padding: 12px 10px;
-      border: 1px solid rgba(120, 20, 20, 0.7);
-      background: linear-gradient(180deg, #151515, #090909);
-      color: #f0e6d0;
-      font: inherit;
-      font-size: 0.72rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      text-align: center;
-    }
-
-    .btn-clip.is-pinned {
-      border-color: rgba(210, 34, 34, 0.95);
-      background: linear-gradient(180deg, rgba(80,0,0,0.9), #090909);
-      color: #fff4e2;
-    }
-
-    .btn-clip.is-playing {
-      border-color: #ff3333;
-      color: #fff;
-      box-shadow: 0 0 18px rgba(255, 0, 0, 0.35);
-    }
-
-    .clip-meta {
-      display: block;
-      margin-top: 4px;
-      opacity: 0.55;
       font-size: 0.58rem;
       letter-spacing: 0.08em;
+      text-transform: uppercase;
     }
 
-    .empty-results {
-      color: #8d8172;
-      font-size: 0.75rem;
+    .bank-tab.is-active {
+      color: #fff2d8;
+      border-color: #ff2222;
+      background: rgba(100, 0, 0, 0.45);
+    }
+
+    .bank-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 7px;
+    }
+
+    .bank-btn {
+      position: relative;
+      overflow: hidden;
+      min-height: 44px;
+      padding: 9px 7px;
+      border: 1px solid rgba(140, 0, 0, 0.75);
+      background: linear-gradient(180deg, #141414, #080808);
+      color: #f2e8d5;
+      font: inherit;
+      font-size: 0.58rem;
+      letter-spacing: 0.055em;
+      line-height: 1.2;
+      text-transform: uppercase;
+      text-align: center;
+    }
+
+    .bank-btn.is-playing {
+      border-color: #ff3333;
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(255, 0, 0, 0.35);
+      background: linear-gradient(180deg, rgba(110, 0, 0, 0.85), #080808);
+    }
+
+    .bank-meta {
+      display: block;
+      margin-top: 3px;
+      color: #8b7c68;
+      font-size: 0.48rem;
+      letter-spacing: 0.06em;
+    }
+
+    .bank-empty {
+      grid-column: 1 / -1;
+      border: 1px dashed rgba(120, 0, 0, 0.55);
+      color: #8b7c68;
+      text-align: center;
+      padding: 12px 8px;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+    }
+
+    .bank-note {
+      margin-top: 9px;
+      color: #756857;
+      font-size: 0.55rem;
       letter-spacing: 0.08em;
       text-align: center;
-      padding: 16px 8px;
-      border: 1px dashed rgba(120, 20, 20, 0.45);
-    }
-
-    @media (min-width: 560px) {
-      .quick-grid,
-      .expanded-grid {
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-      }
+      text-transform: uppercase;
     }
 
   </style>
@@ -416,232 +408,84 @@
     </div>
   </div>
 
-  <!-- QUICK RESPONSE -->
-  <div class="quick-section">
-    <div class="section-label">PINNED QUICK RESPONSE</div>
-    <div class="quick-grid" id="quickGrid"></div>
+  <!-- PHRASES -->
+  <div class="phrases-section">
+    <div class="section-label">PHRASE DISPATCH</div>
+    <div class="phrases-grid" id="phrasesGrid"></div>
   </div>
 
-  <!-- SEARCH -->
-  <div class="search-section">
-    <div class="section-label">SEARCH AUDIO BANK</div>
-    <input class="search-input" id="clipSearch" type="search" placeholder="Search lines fast..." autocomplete="off">
+  <!-- BINARY RESPONSE -->
+  <div class="binary-section">
+    <div class="section-label">BINARY RESPONSE</div>
+    <div class="binary-grid">
+      <button class="btn-binary" id="btnYes" onclick="playBinary('yes')">
+        <span class="dia">◆</span>YES
+      </button>
+      <button class="btn-binary" id="btnNo" onclick="playBinary('no')">
+        <span class="dia">◆</span>NO
+      </button>
+    </div>
   </div>
 
-  <!-- AUDIO — breathing stays as a real element for fastest loop control -->
-<audio id="snd-breathing" src="audio/breathing.mp3" preload="auto" loop></audio>
+  <!-- EXPANDED AUDIO BANK -->
+  <div class="audio-bank-section">
+    <div class="section-label">EXPANDED AUDIO BANK</div>
+    <input class="bank-search" id="bankSearch" type="search" placeholder="Search extra Vader lines..." autocomplete="off">
+    <div class="bank-tabs" id="bankTabs"></div>
+    <div class="bank-grid" id="bankGrid"></div>
+    <div class="bank-note">Existing core controls above remain show-safe.</div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="footer-text">// IMPERIAL AUDIO COMMAND // CLASSIFIED //</div>
+  </div>
+
+</div>
+
+<!-- AUDIO — keep all MP3s in the same folder as this HTML file -->
+<audio id="snd-breathing"  src="audio/breathing.mp3"                                                     loop></audio>
+<audio id="snd-darkside"   src="audio/youwillfalltothepowerofthedarkside.mp3"></audio>
+<audio id="snd-comeforyou" src="audio/ihavecomeforyou.mp3"></audio>
+<audio id="snd-impressive" src="audio/mostimpressive.mp3"></audio>
+<audio id="snd-shallsee"   src="audio/weshallsee.mp3"></audio>
+<audio id="snd-convenient" src="audio/howconvenient.mp3"></audio>
+<audio id="snd-delusion"   src="audio/itisdelusiontothinkyouractionshavehadanyconsequence.mp3"></audio>
+<audio id="snd-soweak"     src="audio/soweak.mp3"></audio>
+<audio id="snd-archive"    src="audio/thisarchivewillburn!.mp3"></audio>
+<audio id="snd-noescape"   src="audio/youshallnotescapemethistime.mp3"></audio>
+<audio id="snd-wastetime"  src="audio/youwastetime.mp3"></audio>
+<audio id="snd-yes"        src="audio/yes.mp3"></audio>
+<audio id="snd-no"         src="audio/no.mp3"></audio>
 
 <script>
-  // ── AUDIO BANK CONFIG ─────────────────────────────────────────────
-  const CLIPS = [
-    // Pinned / urgent
-    { label: 'YES', category: 'Pinned', src: 'audio/yes.mp3', pinned: true },
-    { label: 'NO', category: 'Pinned', src: 'audio/no.mp3', pinned: true },
-    { label: 'AS YOU WISH', category: 'Pinned', src: 'audio/QuickReactions/asyouwish.mp3', pinned: true },
-    { label: 'MOST IMPRESSIVE', category: 'Pinned', src: 'audio/mostimpressive.mp3', pinned: true },
-    { label: 'WE SHALL SEE', category: 'Pinned', src: 'audio/weshallsee.mp3', pinned: true },
-    { label: 'YOU WASTE TIME', category: 'Pinned', src: 'audio/youwastetime.mp3', pinned: true },
-    { label: 'YOUR END IS NEAR', category: 'Pinned', src: 'audio/ThreatsIntimidation/yourendisnear.mp3', pinned: true },
-    { label: 'YOU SHALL NOT ESCAPE', category: 'Pinned', src: 'audio/youshallnotescapemethistime.mp3', pinned: true },
-    { label: 'NOOOOOOOO', category: 'Pinned', src: 'audio/CombatAction/NOOOOOOOO.mp3', pinned: true },
-
-    // Quick reactions
-    { label: 'THAT IS CORRECT', category: 'Quick Reactions', src: 'audio/QuickReactions/Thatiscorrect.mp3' },
-    { label: 'GOOD', category: 'Quick Reactions', src: 'audio/QuickReactions/good.mp3' },
-    { label: 'GOOD WORK', category: 'Quick Reactions', src: 'audio/QuickReactions/goodwork!.mp3' },
-    { label: 'I HAVE YOU NOW', category: 'Quick Reactions', src: 'audio/QuickReactions/ihaveyounow.mp3' },
-    { label: 'IMPRESSIVE', category: 'Quick Reactions', src: 'audio/QuickReactions/impressive!.mp3' },
-    { label: 'MOST IMPRESSIVE', category: 'Quick Reactions', src: 'audio/QuickReactions/mostimpressive.mp3' },
-    { label: 'NO', category: 'Quick Reactions', src: 'audio/QuickReactions/no.mp3' },
-    { label: 'THAT’S IT', category: 'Quick Reactions', src: 'audio/QuickReactions/thatsit!.mp3' },
-    { label: 'THE FORCE IS STRONG WITH THIS ONE', category: 'Quick Reactions', src: 'audio/QuickReactions/theforceisstrongwiththisone.mp3' },
-    { label: 'WE SHALL SEE', category: 'Quick Reactions', src: 'audio/QuickReactions/weshallsee.mp3' },
-    { label: 'YES', category: 'Quick Reactions', src: 'audio/QuickReactions/yes.mp3' },
-
-    // Threats / intimidation
-    { label: 'I HAVE COME FOR YOU', category: 'Threats / Intimidation', src: 'audio/ThreatsIntimidation/ihavecomeforyou.mp3' },
-    { label: 'YOU WILL FALL TO THE POWER OF THE DARK SIDE', category: 'Threats / Intimidation', src: 'audio/ThreatsIntimidation/youwillfalltothepowerofthedarkside.mp3' },
-    { label: 'IT IS DELUSION', category: 'Threats / Intimidation', src: 'audio/ThreatsIntimidation/itisdelusiontothinkyouractionshavehadanyconsequence.mp3' },
-    { label: 'JOIN ME AND WE CAN RULE THE GALAXY', category: 'Threats / Intimidation', src: 'audio/ThreatsIntimidation/joinmeandwecanrulethegalaxyasfatherandson.mp3' },
-    { label: 'YOU HAVE FAILED ME FOR THE LAST TIME', category: 'Threats / Intimidation', src: 'audio/ThreatsIntimidation/youhavefailedmeforthelasttime.mp3' },
-    { label: 'YOUR FAILURE IS INEVITABLE', category: 'Threats / Intimidation', src: 'audio/ThreatsIntimidation/yourfailureisinevitable.mp3' },
-    { label: 'YOUR POWERS ARE WEAK OLD MAN', category: 'Threats / Intimidation', src: 'audio/ThreatsIntimidation/yourpowersareweakoldman.mp3' },
-    { label: 'YOUR TIME IS OVER', category: 'Threats / Intimidation', src: 'audio/ThreatsIntimidation/yourtimeisover.mp3' },
-    { label: 'TECHNOLOGICAL TERROR', category: 'Threats / Intimidation', src: 'audio/ThreatsIntimidation/dontbetooproudofthistechnologicalterroryouveconstructed.mp3' },
-
-    // Empire / authority
-    { label: 'DISCUSS THE LOCATION OF YOUR HIDDEN REBEL BASE', category: 'Empire / Authority', src: 'audio/EmpireAuthority/andnowyourhighnesswewilldiscussthelocationofyourhiddenrebelbase.mp3' },
-    { label: 'I WANT TO KNOW WHAT HAPPENED TO THE PLANS', category: 'Empire / Authority', src: 'audio/EmpireAuthority/iwanttoknowwhathappenedtotheplanstheysentyou.mp3' },
-    { label: 'THE EMPEROR DOES NOT SHARE YOUR OPTIMISM', category: 'Empire / Authority', src: 'audio/EmpireAuthority/theemperordoesnotshareyouroptimisticappraisalofthesituation.mp3' },
-    { label: 'YOU ARE PART OF THE REBEL ALLIANCE AND A TRAITOR', category: 'Empire / Authority', src: 'audio/EmpireAuthority/youarepartoftherebelallianceandatraitor.mp3' },
-
-    // Manipulation / dark side
-    { label: 'DON’T UNDERESTIMATE THE FORCE', category: 'Manipulation / Dark Side', src: 'audio/ManipulationDarkSidePropaganda/dontunderestimatetheforce.mp3' },
-    { label: 'IF YOU ONLY KNEW THE POWER OF THE DARK SIDE', category: 'Manipulation / Dark Side', src: 'audio/ManipulationDarkSidePropaganda/ifyouonlyknewthepowerofthedarkside.mp3' },
-    { label: 'IT IS YOUR DESTINY', category: 'Manipulation / Dark Side', src: 'audio/ManipulationDarkSidePropaganda/itisyourdestiny.mp3' },
-    { label: 'SO YOU HAVE ACCEPTED THE TRUTH', category: 'Manipulation / Dark Side', src: 'audio/ManipulationDarkSidePropaganda/soyouhaveacceptedthetruth.mp3' },
-    { label: 'WE WOULD BE HONORED IF YOU WOULD JOIN US', category: 'Manipulation / Dark Side', src: 'audio/ManipulationDarkSidePropaganda/wewouldbehonoredifyouwouldjoinus.mp3' },
-    { label: 'YOU DON’T KNOW THE POWER OF THE DARK SIDE', category: 'Manipulation / Dark Side', src: 'audio/ManipulationDarkSidePropaganda/youdontknowthepowerofthedarkside.mp3' },
-
-    // Anger / disappointment
-    { label: 'APOLOGY ACCEPTED', category: 'Anger / Disappointment', src: 'audio/AngerDisappointment/apologyaccepted.mp3' },
-    { label: 'DON’T FAIL ME AGAIN', category: 'Anger / Disappointment', src: 'audio/AngerDisappointment/dontfailmeagain.mp3' },
-    { label: 'I AM ALTERING THE DEAL', category: 'Anger / Disappointment', src: 'audio/AngerDisappointment/iamalteringthedealprayidontalteritanyfurther.mp3' },
-    { label: 'I FIND YOUR LACK OF FAITH DISTURBING', category: 'Anger / Disappointment', src: 'audio/AngerDisappointment/ifindyourlackoffaithdisturbing.mp3' },
-    { label: 'PERHAPS YOU THINK YOU’RE BEING TREATED UNFAIRLY', category: 'Anger / Disappointment', src: 'audio/AngerDisappointment/perhapsyouthinkyourebeingtreatedunfairly.mp3' },
-    { label: 'YOU WASTE TIME', category: 'Anger / Disappointment', src: 'audio/AngerDisappointment/youwastetime.mp3' },
-
-    // Combat / action
-    { label: 'DON’T MAKE ME DESTROY YOU', category: 'Combat / Action', src: 'audio/CombatAction/dontmakemedestroyyou.mp3' },
-    { label: 'JOIN THE JEDI IN DEATH', category: 'Combat / Action', src: 'audio/CombatAction/jointhejediindeath!.mp3' },
-    { label: 'THIS ARCHIVE WILL BURN', category: 'Combat / Action', src: 'audio/CombatAction/thisarchivewillburn!.mp3' },
-
-    // Misc
-    { label: 'ELUSIVE', category: 'Misc', src: 'audio/Misc/elusive.mp3' },
-    { label: 'FUTILE', category: 'Misc', src: 'audio/Misc/futile.mp3' },
-    { label: 'HOW CONVENIENT', category: 'Misc', src: 'audio/Misc/howconvenient.mp3' },
-    { label: 'POINTLESS', category: 'Misc', src: 'audio/Misc/pointless!.mp3' },
-    { label: 'SO WEAK', category: 'Misc', src: 'audio/Misc/soweak.mp3' },
-    { label: 'SUBMIT', category: 'Misc', src: 'audio/Misc/submit!.mp3' },
-    { label: 'YOU HAVE GATHERED THE REMNANTS OF THE JEDI TRADITION', category: 'Misc', src: 'audio/Misc/youhavegatheredtheremnantsofthejeditradition.mp3' },
-    { label: 'YOU HAVE GROWN STRONGER', category: 'Misc', src: 'audio/Misc/youhavegrownstronger.mp3' },
+  // ── PHRASE CONFIG ──────────────────────────────────────────────────
+  const PHRASES = [
+    { label: 'YOU WILL FALL TO THE POWER OF THE DARK SIDE', id: 'snd-darkside'   },
+    { label: 'I HAVE COME FOR YOU',                          id: 'snd-comeforyou' },
+    { label: 'MOST IMPRESSIVE',                              id: 'snd-impressive' },
+    { label: 'WE SHALL SEE',                                 id: 'snd-shallsee'   },
+    { label: 'HOW CONVENIENT',                               id: 'snd-convenient' },
+    { label: 'IT IS DELUSION',                               id: 'snd-delusion'   },
+    { label: 'SO WEAK',                                      id: 'snd-soweak'     },
+    { label: 'THIS ARCHIVE WILL BURN',                       id: 'snd-archive'    },
+    { label: 'YOU SHALL NOT ESCAPE',                         id: 'snd-noescape'   },
+    { label: 'YOU WASTE TIME',                               id: 'snd-wastetime'  },
   ];
 
-  const CATEGORIES = [
-    'All',
-    'Quick Reactions',
-    'Threats / Intimidation',
-    'Empire / Authority',
-    'Manipulation / Dark Side',
-    'Anger / Disappointment',
-    'Combat / Action',
-    'Misc'
-  ];
-
-  const audioCache = new Map();
-  let activeCategory = 'All';
-  let activeAudio = null;
-  let unlocked = false;
-
-  function getAudio(src, urgent = false) {
-    if (!audioCache.has(src)) {
-      const a = new Audio(src);
-      a.preload = urgent ? 'auto' : 'metadata';
-      audioCache.set(src, a);
-    }
-    return audioCache.get(src);
-  }
-
-  function warmPinnedAudio() {
-    if (unlocked) return;
-    unlocked = true;
-    CLIPS.filter(c => c.pinned).forEach(c => {
-      const a = getAudio(c.src, true);
-      try { a.load(); } catch (_) {}
-    });
-  }
-
-  // Warm the urgent sounds after the first real user interaction.
-  document.addEventListener('pointerdown', warmPinnedAudio, { once: true });
-
-  // Pre-create urgent clips immediately.
-  CLIPS.filter(c => c.pinned).forEach(c => getAudio(c.src, true));
-
-  function stopActiveClip() {
-    if (activeAudio) {
-      activeAudio.pause();
-      activeAudio.currentTime = 0;
-    }
-    document.querySelectorAll('.btn-clip').forEach(b => b.classList.remove('is-playing'));
-  }
-
-  function playClip(clip, btn) {
-    warmPinnedAudio();
-    stopActiveClip();
-
-    const audio = getAudio(clip.src, clip.pinned);
-    activeAudio = audio;
-    audio.currentTime = 0;
-    audio.play().catch(err => {
-      console.warn('Audio playback failed:', clip.src, err);
-    });
-
-    btn.classList.add('is-playing');
-    audio.onended = () => btn.classList.remove('is-playing');
-  }
-
-  function makeClipButton(clip, includeMeta = true) {
+  // Build phrase buttons dynamically
+  const grid = document.getElementById('phrasesGrid');
+  PHRASES.forEach(({ label, id }) => {
     const btn = document.createElement('button');
-    btn.className = 'btn-clip' + (clip.pinned ? ' is-pinned' : '');
-    btn.innerHTML = includeMeta
-      ? `${clip.label}<span class="clip-meta">${clip.category}</span>`
-      : clip.label;
-    btn.addEventListener('click', e => {
-      addRipple(btn, e);
-      playClip(clip, btn);
+    btn.className = 'btn-phrase';
+    btn.textContent = label;
+    btn.dataset.soundId = id;
+    btn.addEventListener('click', function(e) {
+      addRipple(this, e);
+      playPhrase(this);
     });
-    return btn;
-  }
-
-  function renderQuickGrid() {
-    const quickGrid = document.getElementById('quickGrid');
-    quickGrid.innerHTML = '';
-    CLIPS.filter(c => c.pinned).forEach(clip => {
-      quickGrid.appendChild(makeClipButton(clip, false));
-    });
-  }
-
-  function renderCategoryTabs() {
-    const tabs = document.getElementById('categoryTabs');
-    tabs.innerHTML = '';
-    CATEGORIES.forEach(cat => {
-      const btn = document.createElement('button');
-      btn.className = 'category-tab' + (cat === activeCategory ? ' is-active' : '');
-      btn.textContent = cat;
-      btn.addEventListener('click', () => {
-        activeCategory = cat;
-        renderCategoryTabs();
-        renderClipGrid();
-      });
-      tabs.appendChild(btn);
-    });
-  }
-
-  function renderClipGrid() {
-    const grid = document.getElementById('clipGrid');
-    const q = document.getElementById('clipSearch').value.trim().toLowerCase();
-    grid.innerHTML = '';
-
-    let clips = CLIPS.filter(c => !c.pinned);
-
-    if (activeCategory !== 'All') {
-      clips = clips.filter(c => c.category === activeCategory);
-    }
-
-    if (q) {
-      clips = CLIPS.filter(c =>
-        c.label.toLowerCase().includes(q) ||
-        c.category.toLowerCase().includes(q) ||
-        c.src.toLowerCase().includes(q)
-      );
-    }
-
-    if (!clips.length) {
-      const empty = document.createElement('div');
-      empty.className = 'empty-results';
-      empty.textContent = 'NO MATCHING AUDIO COMMANDS';
-      grid.appendChild(empty);
-      return;
-    }
-
-    clips.forEach(clip => grid.appendChild(makeClipButton(clip, true)));
-  }
-
-  document.getElementById('clipSearch').addEventListener('input', renderClipGrid);
-
-  renderQuickGrid();
-  renderCategoryTabs();
-  renderClipGrid();
+    grid.appendChild(btn);
+  });
 
   // ── BREATHING ─────────────────────────────────────────────────────
   const breathAudio = document.getElementById('snd-breathing');
@@ -651,13 +495,13 @@
   breathAudio.volume = 0.5;
   breathAudio.loop = true;
 
+  // Belt-and-suspenders: if the browser fires 'ended' while still active, restart
   let breathActive = false;
   breathAudio.addEventListener('ended', () => {
     if (breathActive) { breathAudio.currentTime = 0; breathAudio.play(); }
   });
 
   function startBreathing() {
-    warmPinnedAudio();
     breathActive = true;
     breathAudio.currentTime = 0;
     breathAudio.play();
@@ -673,6 +517,36 @@
     btnInitiate.classList.remove('is-active');
   }
 
+  // ── PHRASE PLAYBACK ────────────────────────────────────────────────
+  function playPhrase(btn) {
+    const audio = document.getElementById(btn.dataset.soundId);
+    if (!audio) return;
+
+    // Stop any other phrase that's playing
+    PHRASES.forEach(({ id }) => {
+      const a = document.getElementById(id);
+      if (a && a !== audio) { a.pause(); a.currentTime = 0; }
+    });
+    document.querySelectorAll('.btn-phrase').forEach(b => b.classList.remove('is-playing'));
+
+    audio.currentTime = 0;
+    audio.play();
+    btn.classList.add('is-playing');
+
+    audio.onended = () => btn.classList.remove('is-playing');
+  }
+
+  // ── BINARY RESPONSE ───────────────────────────────────────────────
+  function playBinary(which) {
+    const audio = document.getElementById('snd-' + which);
+    const btn   = document.getElementById('btn' + which.charAt(0).toUpperCase() + which.slice(1));
+    if (!audio) return;
+    audio.currentTime = 0;
+    audio.play();
+    btn.classList.add('is-playing');
+    audio.onended = () => btn.classList.remove('is-playing');
+  }
+
   // ── RIPPLE ────────────────────────────────────────────────────────
   function addRipple(el, e) {
     const r    = document.createElement('span');
@@ -684,9 +558,184 @@
     setTimeout(() => r.remove(), 600);
   }
 
-  document.querySelectorAll('.btn-breathe').forEach(btn => {
+  document.querySelectorAll('.btn-breathe, .btn-binary').forEach(btn => {
     btn.addEventListener('click', e => addRipple(btn, e));
   });
 </script>
+
+<script>
+  // ── COMPACT EXPANDED AUDIO BANK ─────────────────────────────────
+  const EXTRA_CLIPS = [
+    { label: 'As You Wish', category: 'Quick', src: 'audio/QuickReactions/asyouwish.mp3' },
+    { label: 'Good', category: 'Quick', src: 'audio/QuickReactions/good.mp3' },
+    { label: 'Good Work', category: 'Quick', src: 'audio/QuickReactions/goodwork!.mp3' },
+    { label: 'I Have You Now', category: 'Quick', src: 'audio/QuickReactions/ihaveyounow.mp3' },
+    { label: 'Impressive', category: 'Quick', src: 'audio/QuickReactions/impressive!.mp3' },
+    { label: 'Most Impressive', category: 'Quick', src: 'audio/QuickReactions/mostimpressive.mp3' },
+    { label: 'No', category: 'Quick', src: 'audio/QuickReactions/no.mp3' },
+    { label: 'That Is Correct', category: 'Quick', src: 'audio/QuickReactions/Thatiscorrect.mp3' },
+    { label: "That’s It", category: 'Quick', src: 'audio/QuickReactions/thatsit!.mp3' },
+    { label: 'The Force Is Strong With This One', category: 'Quick', src: 'audio/QuickReactions/theforceisstrongwiththisone.mp3' },
+    { label: 'We Shall See', category: 'Quick', src: 'audio/QuickReactions/weshallsee.mp3' },
+    { label: 'Yes', category: 'Quick', src: 'audio/QuickReactions/yes.mp3' },
+
+    { label: 'I Have Come For You', category: 'Threats', src: 'audio/ThreatsIntimidation/ihavecomeforyou.mp3' },
+    { label: 'You Will Fall To The Power Of The Dark Side', category: 'Threats', src: 'audio/ThreatsIntimidation/youwillfalltothepowerofthedarkside.mp3' },
+    { label: 'It Is Delusion', category: 'Threats', src: 'audio/ThreatsIntimidation/itisdelusiontothinkyouractionshavehadanyconsequence.mp3' },
+    { label: 'Join Me And We Can Rule The Galaxy', category: 'Threats', src: 'audio/ThreatsIntimidation/joinmeandwecanrulethegalaxyasfatherandson.mp3' },
+    { label: 'You Have Failed Me For The Last Time', category: 'Threats', src: 'audio/ThreatsIntimidation/youhavefailedmeforthelasttime.mp3' },
+    { label: 'Your End Is Near', category: 'Threats', src: 'audio/ThreatsIntimidation/yourendisnear.mp3' },
+    { label: 'Your Failure Is Inevitable', category: 'Threats', src: 'audio/ThreatsIntimidation/yourfailureisinevitable.mp3' },
+    { label: 'Your Powers Are Weak Old Man', category: 'Threats', src: 'audio/ThreatsIntimidation/yourpowersareweakoldman.mp3' },
+    { label: 'Your Time Is Over', category: 'Threats', src: 'audio/ThreatsIntimidation/yourtimeisover.mp3' },
+    { label: 'You Shall Not Escape Me This Time', category: 'Threats', src: 'audio/ThreatsIntimidation/youshallnotescapemethistime.mp3' },
+    { label: 'Technological Terror', category: 'Threats', src: 'audio/ThreatsIntimidation/dontbetooproudofthistechnologicalterroryouveconstructed.mp3' },
+
+    { label: 'Hidden Rebel Base', category: 'Empire', src: 'audio/EmpireAuthority/andnowyourhighnesswewilldiscussthelocationofyourhiddenrebelbase.mp3' },
+    { label: 'What Happened To The Plans', category: 'Empire', src: 'audio/EmpireAuthority/iwanttoknowwhathappenedtotheplanstheysentyou.mp3' },
+    { label: 'The Emperor Does Not Share Your Optimism', category: 'Empire', src: 'audio/EmpireAuthority/theemperordoesnotshareyouroptimisticappraisalofthesituation.mp3' },
+    { label: 'Rebel Alliance And A Traitor', category: 'Empire', src: 'audio/EmpireAuthority/youarepartoftherebelallianceandatraitor.mp3' },
+
+    { label: "Don’t Underestimate The Force", category: 'Dark Side', src: 'audio/ManipulationDarkSidePropaganda/dontunderestimatetheforce.mp3' },
+    { label: 'Power Of The Dark Side', category: 'Dark Side', src: 'audio/ManipulationDarkSidePropaganda/ifyouonlyknewthepowerofthedarkside.mp3' },
+    { label: 'It Is Your Destiny', category: 'Dark Side', src: 'audio/ManipulationDarkSidePropaganda/itisyourdestiny.mp3' },
+    { label: 'Accepted The Truth', category: 'Dark Side', src: 'audio/ManipulationDarkSidePropaganda/soyouhaveacceptedthetruth.mp3' },
+    { label: 'We Would Be Honored If You Would Join Us', category: 'Dark Side', src: 'audio/ManipulationDarkSidePropaganda/wewouldbehonoredifyouwouldjoinus.mp3' },
+    { label: "You Don’t Know The Power Of The Dark Side", category: 'Dark Side', src: 'audio/ManipulationDarkSidePropaganda/youdontknowthepowerofthedarkside.mp3' },
+
+    { label: 'Apology Accepted', category: 'Anger', src: 'audio/AngerDisappointment/apologyaccepted.mp3' },
+    { label: "Don’t Fail Me Again", category: 'Anger', src: 'audio/AngerDisappointment/dontfailmeagain.mp3' },
+    { label: 'I Am Altering The Deal', category: 'Anger', src: 'audio/AngerDisappointment/iamalteringthedealprayidontalteritanyfurther.mp3' },
+    { label: 'Lack Of Faith Disturbing', category: 'Anger', src: 'audio/AngerDisappointment/ifindyourlackoffaithdisturbing.mp3' },
+    { label: "Being Treated Unfairly", category: 'Anger', src: 'audio/AngerDisappointment/perhapsyouthinkyourebeingtreatedunfairly.mp3' },
+    { label: 'You Waste Time', category: 'Anger', src: 'audio/AngerDisappointment/youwastetime.mp3' },
+
+    { label: "Don’t Make Me Destroy You", category: 'Action', src: 'audio/CombatAction/dontmakemedestroyyou.mp3' },
+    { label: 'Join The Jedi In Death', category: 'Action', src: 'audio/CombatAction/jointhejediindeath!.mp3' },
+    { label: 'NOOOOOOOO', category: 'Action', src: 'audio/CombatAction/NOOOOOOOO.mp3' },
+    { label: 'This Archive Will Burn', category: 'Action', src: 'audio/CombatAction/thisarchivewillburn!.mp3' },
+
+    { label: 'Elusive', category: 'Misc', src: 'audio/Misc/elusive.mp3' },
+    { label: 'Futile', category: 'Misc', src: 'audio/Misc/futile.mp3' },
+    { label: 'How Convenient', category: 'Misc', src: 'audio/Misc/howconvenient.mp3' },
+    { label: 'Pointless', category: 'Misc', src: 'audio/Misc/pointless!.mp3' },
+    { label: 'So Weak', category: 'Misc', src: 'audio/Misc/soweak.mp3' },
+    { label: 'Submit', category: 'Misc', src: 'audio/Misc/submit!.mp3' },
+    { label: 'Jedi Tradition Remnants', category: 'Misc', src: 'audio/Misc/youhavegatheredtheremnantsofthejeditradition.mp3' },
+    { label: 'You Have Grown Stronger', category: 'Misc', src: 'audio/Misc/youhavegrownstronger.mp3' },
+  ];
+
+  const BANK_CATEGORIES = ['Quick', 'Threats', 'Empire', 'Dark Side', 'Anger', 'Action', 'Misc', 'All'];
+  const bankAudioCache = new Map();
+  let bankActiveCategory = 'Quick';
+  let bankActiveAudio = null;
+  let bankWarmStarted = false;
+
+  function getBankAudio(src) {
+    if (!bankAudioCache.has(src)) {
+      const audio = new Audio(src);
+      audio.preload = 'auto';
+      bankAudioCache.set(src, audio);
+    }
+    return bankAudioCache.get(src);
+  }
+
+  function warmBankAudio() {
+    if (bankWarmStarted) return;
+    bankWarmStarted = true;
+    EXTRA_CLIPS.forEach(clip => {
+      try { getBankAudio(clip.src).load(); } catch (_) {}
+    });
+  }
+
+  document.addEventListener('pointerdown', warmBankAudio, { once: true });
+
+  function stopBankAudio() {
+    if (bankActiveAudio) {
+      bankActiveAudio.pause();
+      bankActiveAudio.currentTime = 0;
+    }
+    document.querySelectorAll('.bank-btn').forEach(btn => btn.classList.remove('is-playing'));
+  }
+
+  function playBankClip(clip, btn) {
+    warmBankAudio();
+    stopBankAudio();
+
+    const audio = getBankAudio(clip.src);
+    bankActiveAudio = audio;
+    audio.currentTime = 0;
+    audio.play().catch(err => console.warn('Bank audio failed:', clip.src, err));
+
+    btn.classList.add('is-playing');
+    audio.onended = () => btn.classList.remove('is-playing');
+  }
+
+  function renderBankTabs() {
+    const tabs = document.getElementById('bankTabs');
+    if (!tabs) return;
+
+    tabs.innerHTML = '';
+    BANK_CATEGORIES.forEach(category => {
+      const btn = document.createElement('button');
+      btn.className = 'bank-tab' + (category === bankActiveCategory ? ' is-active' : '');
+      btn.textContent = category;
+      btn.addEventListener('click', () => {
+        bankActiveCategory = category;
+        renderBankTabs();
+        renderBankGrid();
+      });
+      tabs.appendChild(btn);
+    });
+  }
+
+  function renderBankGrid() {
+    const grid = document.getElementById('bankGrid');
+    const search = document.getElementById('bankSearch');
+    if (!grid || !search) return;
+
+    const q = search.value.trim().toLowerCase();
+    let clips = EXTRA_CLIPS;
+
+    if (q) {
+      clips = clips.filter(clip =>
+        clip.label.toLowerCase().includes(q) ||
+        clip.category.toLowerCase().includes(q) ||
+        clip.src.toLowerCase().includes(q)
+      );
+    } else if (bankActiveCategory !== 'All') {
+      clips = clips.filter(clip => clip.category === bankActiveCategory);
+    }
+
+    grid.innerHTML = '';
+
+    if (!clips.length) {
+      const empty = document.createElement('div');
+      empty.className = 'bank-empty';
+      empty.textContent = 'NO MATCHING AUDIO';
+      grid.appendChild(empty);
+      return;
+    }
+
+    clips.forEach(clip => {
+      const btn = document.createElement('button');
+      btn.className = 'bank-btn';
+      btn.innerHTML = `${clip.label}<span class="bank-meta">${clip.category}</span>`;
+      btn.addEventListener('click', e => {
+        if (typeof addRipple === 'function') addRipple(btn, e);
+        playBankClip(clip, btn);
+      });
+      grid.appendChild(btn);
+    });
+  }
+
+  const bankSearch = document.getElementById('bankSearch');
+  if (bankSearch) {
+    bankSearch.addEventListener('input', renderBankGrid);
+    renderBankTabs();
+    renderBankGrid();
+  }
+</script>
+
 </body>
 </html>

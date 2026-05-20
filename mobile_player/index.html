@@ -371,6 +371,49 @@
       display: none !important;
     }
 
+
+    /* ── SHOW AUDIO PRELOAD CONTROL ─────────────────────────────── */
+    .bank-loader {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 7px;
+      margin-bottom: 10px;
+    }
+
+    .bank-load-btn {
+      min-height: 42px;
+      border: 1px solid rgba(0, 180, 80, 0.75);
+      background: linear-gradient(180deg, rgba(0, 55, 25, 0.75), #060606);
+      color: #c9ffd8;
+      font: inherit;
+      font-size: 0.64rem;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      touch-action: manipulation;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .bank-load-btn.is-loading {
+      border-color: rgba(255, 170, 0, 0.85);
+      color: #ffe0a3;
+      background: linear-gradient(180deg, rgba(80, 45, 0, 0.75), #060606);
+    }
+
+    .bank-load-btn.is-ready {
+      border-color: rgba(0, 255, 115, 0.95);
+      color: #ffffff;
+      box-shadow: 0 0 14px rgba(0, 255, 115, 0.22);
+    }
+
+    .bank-load-status {
+      color: #7d725f;
+      font-size: 0.54rem;
+      letter-spacing: 0.08em;
+      text-align: center;
+      text-transform: uppercase;
+      min-height: 14px;
+    }
+
   </style>
 </head>
 <body>
@@ -449,6 +492,10 @@
   <!-- EXPANDED AUDIO BANK -->
   <div class="audio-bank-section">
     <div class="section-label">AUDIO BANK</div>
+    <div class="bank-loader">
+      <button class="bank-load-btn" id="bankLoadBtn" type="button">LOAD SHOW AUDIO</button>
+      <div class="bank-load-status" id="bankLoadStatus">Not loaded yet</div>
+    </div>
     <input class="bank-search" id="bankSearch" type="search" placeholder="Search extra Vader lines..." autocomplete="off">
     <div class="bank-tabs" id="bankTabs"></div>
     <div class="bank-grid" id="bankGrid"></div>
@@ -659,11 +706,89 @@
   }
 
   function warmBankAudio() {
-    if (bankWarmStarted) return;
-    bankWarmStarted = true;
-    EXTRA_CLIPS.forEach(clip => {
-      try { getBankAudio(clip.src).load(); } catch (_) {}
+    if (bankWarmStarted) return Promise.resolve({ loaded: 0, failed: 0 });
+    return preloadShowAudio();
+  }
+
+  function preloadOneClip(clip) {
+    return new Promise(resolve => {
+      const audio = getBankAudio(clip.src);
+      let settled = false;
+
+      const finish = ok => {
+        if (settled) return;
+        settled = true;
+        audio.removeEventListener('canplaythrough', onReady);
+        audio.removeEventListener('canplay', onReady);
+        audio.removeEventListener('error', onError);
+        resolve(ok);
+      };
+
+      const onReady = () => finish(true);
+      const onError = () => finish(false);
+
+      audio.addEventListener('canplaythrough', onReady, { once: true });
+      audio.addEventListener('canplay', onReady, { once: true });
+      audio.addEventListener('error', onError, { once: true });
+
+      try {
+        audio.load();
+      } catch (_) {
+        finish(false);
+      }
+
+      // Do not hang forever on mobile browsers that refuse canplaythrough.
+      setTimeout(() => finish(audio.readyState >= 2), 3500);
     });
+  }
+
+  async function preloadShowAudio() {
+    const btn = document.getElementById('bankLoadBtn');
+    const status = document.getElementById('bankLoadStatus');
+
+    if (bankWarmStarted) {
+      if (status) status.textContent = 'Audio bank already loaded';
+      if (btn) btn.classList.add('is-ready');
+      return { loaded: EXTRA_CLIPS.length, failed: 0 };
+    }
+
+    bankWarmStarted = true;
+
+    if (btn) {
+      btn.classList.remove('is-ready');
+      btn.classList.add('is-loading');
+      btn.textContent = 'LOADING AUDIO...';
+      btn.disabled = true;
+    }
+    if (status) status.textContent = `Loading 0/${EXTRA_CLIPS.length}`;
+
+    let loaded = 0;
+    let failed = 0;
+
+    // Load in small batches so mobile Safari does not choke.
+    const batchSize = 6;
+    for (let i = 0; i < EXTRA_CLIPS.length; i += batchSize) {
+      const batch = EXTRA_CLIPS.slice(i, i + batchSize);
+      const results = await Promise.all(batch.map(preloadOneClip));
+
+      results.forEach(ok => ok ? loaded++ : failed++);
+      if (status) status.textContent = `Loading ${loaded + failed}/${EXTRA_CLIPS.length}`;
+    }
+
+    if (btn) {
+      btn.disabled = false;
+      btn.classList.remove('is-loading');
+      btn.classList.add('is-ready');
+      btn.textContent = failed ? 'AUDIO MOSTLY READY' : 'AUDIO READY';
+    }
+
+    if (status) {
+      status.textContent = failed
+        ? `${loaded} loaded, ${failed} may load on tap`
+        : `${loaded} clips loaded for show`;
+    }
+
+    return { loaded, failed };
   }
 
   // No global warm-up. Mobile playback stays tied to the actual button tap.
@@ -748,6 +873,22 @@
       btn.addEventListener('touchend', trigger);
       btn.addEventListener('click', trigger);
       grid.appendChild(btn);
+    });
+  }
+
+  const bankLoadBtn = document.getElementById('bankLoadBtn');
+  if (bankLoadBtn) {
+    bankLoadBtn.addEventListener('pointerup', e => {
+      e.preventDefault();
+      preloadShowAudio();
+    });
+    bankLoadBtn.addEventListener('touchend', e => {
+      e.preventDefault();
+      preloadShowAudio();
+    });
+    bankLoadBtn.addEventListener('click', e => {
+      e.preventDefault();
+      preloadShowAudio();
     });
   }
 

@@ -62,9 +62,9 @@ For battery operation, configure these settings:
 - R_BELT_GREEN_1: Pin 32
 
 ### Chest ESP32 LED Pins
-- CHEST_RED_1: Pin 4
-- CHEST_RED_2: Pin 22
-- CHEST_RED_3: Pin 23
+- CHEST_RED_1: D5 / GPIO 5
+- CHEST_RED_2: D6 / GPIO 6
+- CHEST_RED_3: D9 / GPIO 9
 
 ### Touch Sensor Pin (Belt ESP32 Only)
 - TOUCH_BRIGHTNESS_PIN: GPIO 14 (T6) - Capacitive touch for belt red LED brightness control
@@ -113,7 +113,8 @@ The capacitive touch sensor on GPIO 14 allows real-time brightness adjustment fo
 ## Build & Upload
 
 ### Requirements
-- 2x ESP32 development boards
+- 1x ESP32 development board for belt
+- 1x Adafruit Feather ESP32-S3 development board for chest
 - PlatformIO extension for VS Code
 - USB cable for programming each ESP32
 
@@ -126,7 +127,7 @@ The capacitive touch sensor on GPIO 14 allows real-time brightness adjustment fo
 6. Monitor serial output at 115200 baud (if enabled) for each ESP32
 
 ### PlatformIO Configuration
-The project is configured for ESP32 with:
+The belt project is configured for generic ESP32, and the chest project is configured for Adafruit Feather ESP32-S3, with:
 - CPU frequency: 80MHz (configurable for power savings)
 - PSRAM enabled
 - USB CDC disabled on boot (for power savings)

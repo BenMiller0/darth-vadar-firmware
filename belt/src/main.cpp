@@ -17,17 +17,11 @@
 // -----------------------------------------------------------------------------
 // LED CONFIGURATION ARRAY
 // -----------------------------------------------------------------------------
-// Parameter array for belt LEDs only. Includes pin #, delay, and mode settings.
+// Parameter array for software-controlled belt red LEDs.
 // The configuration adapts based on NORMAL_MODE vs VOLATILE_BLINKING mode.
 static LedTaskParams ledParams[NUM_LEDS] = {
-    // Left Belt LEDs
     {L_BELT_RED,        L_BELT_RED_DELAY,       NORMAL_MODE ? 1 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.1f : L_BELT_RED_VOLATILITY,        L_BELT_RED_BRIGHTNESS},
-    {L_BELT_GREEN_0,    L_BELT_GREEN_0_DELAY,   NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.0f : L_BELT_GREEN_0_VOLATILITY,    L_BELT_GREEN_0_BRIGHTNESS},
-    {L_BELT_GREEN_1,    L_BELT_GREEN_1_DELAY,   NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.0f : L_BELT_GREEN_1_VOLATILITY,    L_BELT_GREEN_1_BRIGHTNESS},
-    // Right Belt LEDs
-    {R_BELT_RED,        R_BELT_RED_DELAY,       NORMAL_MODE ? 1 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.1f : R_BELT_RED_VOLATILITY,        R_BELT_RED_BRIGHTNESS},
-    {R_BELT_GREEN_0,    R_BELT_GREEN_0_DELAY,   NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.0f : R_BELT_GREEN_0_VOLATILITY,    R_BELT_GREEN_0_BRIGHTNESS},
-    {R_BELT_GREEN_1,    R_BELT_GREEN_1_DELAY,   NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.0f : R_BELT_GREEN_1_VOLATILITY,    R_BELT_GREEN_1_BRIGHTNESS}
+    {R_BELT_RED,        R_BELT_RED_DELAY,       NORMAL_MODE ? 1 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.1f : R_BELT_RED_VOLATILITY,        R_BELT_RED_BRIGHTNESS}
 };
 
 // Touch sensor brightness control
@@ -130,7 +124,7 @@ void loop() {
             
             // Update the brightness for both belt red LEDs
             ledParams[0].brightness = currentBeltRedBrightness;  // L_BELT_RED
-            ledParams[3].brightness = currentBeltRedBrightness;  // R_BELT_RED
+            ledParams[1].brightness = currentBeltRedBrightness;  // R_BELT_RED
             
             // Force immediate PWM update for both LEDs to ensure sync
             int lBeltChannel = getPwmChannel(L_BELT_RED);

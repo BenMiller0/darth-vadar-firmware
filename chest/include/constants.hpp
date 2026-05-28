@@ -11,10 +11,10 @@
 // LED Layout: 3 Chest Red LEDs only
 
 // Chest LEDs
-// Adafruit Feather ESP32-S3 exposed digital pins: D5, D6, D9-D13.
-#define CHEST_RED_1             5
-#define CHEST_RED_2             6
-#define CHEST_RED_3             9
+// Generic ESP32 GPIO pins. Avoid GPIO 6-11, which are normally used by flash.
+#define CHEST_RED_1             13
+#define CHEST_RED_2             27
+#define CHEST_RED_3             26
 
 // -----------------------------------------------------------------------------
 // BLINK TIMING CONFIGURATION

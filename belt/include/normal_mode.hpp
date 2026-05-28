@@ -8,7 +8,6 @@
 // =============================================================================
 // Normal mode implements the canonical Darth Vader belt LED behavior:
 // - Red belt LEDs: Blink on for ~10 seconds, off for 1 second (with random variation)
-// - Green belt LEDs: Solid on (no blinking)
 
 // -----------------------------------------------------------------------------
 // NORMAL MODE LED BEHAVIORS

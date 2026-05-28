@@ -3,13 +3,13 @@ Built on FreeRTOS. For Star Wars Club @ UC San Diego's Screen accurate Darth Vad
 
 ## Architecture Overview
 This firmware uses a dual ESP32 architecture for improved performance and modularity:
-- **Belt ESP32**: Controls 6 belt LEDs (2 red, 4 green) and touch sensor
+- **Belt ESP32**: Controls 2 belt red LEDs and touch sensor; green belt LEDs are powered directly from 3.3V
 - **Chest ESP32**: Controls 3 chest red LEDs
 - **Independent Operation**: Each ESP32 runs independently without communication
 
 ## Features
 
-- **9 Independent LEDs** split across two ESP32s with dedicated FreeRTOS tasks
+- **5 software-controlled LEDs** split across two ESP32s with dedicated FreeRTOS tasks
 - **Dual ESP32 Architecture** for distributed processing and reliability
 - **Independent Operation**: Each ESP32 runs separately without communication
 - **Capacitive touch brightness control** for belt red LEDs (belt ESP32 only)
@@ -53,21 +53,18 @@ For battery operation, configure these settings:
 
 ## Configuration
 
-### Belt ESP32 LED Pins
-- L_BELT_RED: Pin 13
-- L_BELT_GREEN_0: Pin 27  
-- L_BELT_GREEN_1: Pin 26
-- R_BELT_RED: Pin 25
-- R_BELT_GREEN_0: Pin 33
-- R_BELT_GREEN_1: Pin 32
+### Belt ESP32-S3 LED Pins
+- L_BELT_RED: D5 / GPIO 5
+- R_BELT_RED: D6 / GPIO 6
+- Green belt LEDs: 3.3V power rail, not GPIO-controlled
 
 ### Chest ESP32 LED Pins
-- CHEST_RED_1: D5 / GPIO 5
-- CHEST_RED_2: D6 / GPIO 6
-- CHEST_RED_3: D9 / GPIO 9
+- CHEST_RED_1: GPIO 13
+- CHEST_RED_2: GPIO 27
+- CHEST_RED_3: GPIO 26
 
 ### Touch Sensor Pin (Belt ESP32 Only)
-- TOUCH_BRIGHTNESS_PIN: GPIO 14 (T6) - Capacitive touch for belt red LED brightness control
+- TOUCH_BRIGHTNESS_PIN: D13 / GPIO 13 - Capacitive touch for belt red LED brightness control
 
 ### Timing
 ```cpp
@@ -95,15 +92,15 @@ For battery operation, configure these settings:
 ```
 
 ### Brightness
-Each LED has individual brightness control (0-255 PWM range):
+Each software-controlled LED has individual brightness control (0-255 PWM range):
 ```cpp
 #define L_BELT_RED_BRIGHTNESS          100
-#define L_BELT_GREEN_0_BRIGHTNESS      150
-// ... etc for all LEDs
+#define R_BELT_RED_BRIGHTNESS          100
+// ... etc for chest LEDs
 ```
 
 ### Touch Sensor Brightness Control
-The capacitive touch sensor on GPIO 14 allows real-time brightness adjustment for both belt red LEDs (L_BELT_RED and R_BELT_RED):
+The capacitive touch sensor on D13 / GPIO 13 allows real-time brightness adjustment for both belt red LEDs (L_BELT_RED and R_BELT_RED):
 - **Touch behavior**: Each touch increments to the next brightness level (button-like)
 - **Debounce**: 1 second between touches to prevent accidental triggers
 - **Brightness levels**: 13 linear steps from 2 to 255 (2, 4, 50, 70, 90, 110, 130, 150, 170, 190, 210, 230, 255)
@@ -113,8 +110,8 @@ The capacitive touch sensor on GPIO 14 allows real-time brightness adjustment fo
 ## Build & Upload
 
 ### Requirements
-- 1x ESP32 development board for belt
-- 1x Adafruit Feather ESP32-S3 development board for chest
+- 1x Adafruit Feather ESP32-S3 development board for belt
+- 1x ESP32 development board for chest
 - PlatformIO extension for VS Code
 - USB cable for programming each ESP32
 
@@ -127,7 +124,7 @@ The capacitive touch sensor on GPIO 14 allows real-time brightness adjustment fo
 6. Monitor serial output at 115200 baud (if enabled) for each ESP32
 
 ### PlatformIO Configuration
-The belt project is configured for generic ESP32, and the chest project is configured for Adafruit Feather ESP32-S3, with:
+The belt project is configured for Adafruit Feather ESP32-S3, and the chest project is configured for generic ESP32, with:
 - CPU frequency: 80MHz (configurable for power savings)
 - PSRAM enabled
 - USB CDC disabled on boot (for power savings)
@@ -171,7 +168,7 @@ whiteout/
 Realistic breathing pattern for Darth Vader suit:
 - **Belt red LEDs**: Long on time (~10s) with short off time (~1s), low volatility
 - **Chest red LEDs**: Long off time (~15s) with short on time (~1s), low volatility
-- **Green LEDs**: Steady on (no blinking in normal mode)
+- **Green belt LEDs**: Steady on from the 3.3V rail
 
 ### Volatile Mode
 Random timing patterns with per-LED volatility control:

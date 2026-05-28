@@ -23,11 +23,7 @@ static TaskHandle_t ledTaskHandles[NUM_LEDS] = {nullptr};
 int getLedPin(int index) {
     switch (index) {
         case 0: return L_BELT_RED;
-        case 1: return L_BELT_GREEN_0;
-        case 2: return L_BELT_GREEN_1;
-        case 3: return R_BELT_RED;
-        case 4: return R_BELT_GREEN_0;
-        case 5: return R_BELT_GREEN_1;
+        case 1: return R_BELT_RED;
         default: return L_BELT_RED; // fallback
     }
 }
@@ -36,11 +32,7 @@ int getLedPin(int index) {
 int getLedDelay(int index) {
     switch (index) {
         case 0: return L_BELT_RED_DELAY;
-        case 1: return L_BELT_GREEN_0_DELAY;
-        case 2: return L_BELT_GREEN_1_DELAY;
-        case 3: return R_BELT_RED_DELAY;
-        case 4: return R_BELT_GREEN_0_DELAY;
-        case 5: return R_BELT_GREEN_1_DELAY;
+        case 1: return R_BELT_RED_DELAY;
         default: return L_BELT_RED_DELAY; // fallback
     }
 }
@@ -49,12 +41,17 @@ int getLedDelay(int index) {
 float getLedVolatility(int index) {
     switch (index) {
         case 0: return L_BELT_RED_VOLATILITY;
-        case 1: return L_BELT_GREEN_0_VOLATILITY;
-        case 2: return L_BELT_GREEN_1_VOLATILITY;
-        case 3: return R_BELT_RED_VOLATILITY;
-        case 4: return R_BELT_GREEN_0_VOLATILITY;
-        case 5: return R_BELT_GREEN_1_VOLATILITY;
+        case 1: return R_BELT_RED_VOLATILITY;
         default: return 0.0f; // fallback
+    }
+}
+
+// Get brightness value for LED index
+int getLedBrightness(int index) {
+    switch (index) {
+        case 0: return L_BELT_RED_BRIGHTNESS;
+        case 1: return R_BELT_RED_BRIGHTNESS;
+        default: return L_BELT_RED_BRIGHTNESS; // fallback
     }
 }
 
@@ -127,8 +124,7 @@ void printTestModeStatus(const char* modeName, bool volatileEnabled, bool smooth
     Serial.printf("Test Duration: %d ms\n", TEST_MODE_DURATION_MS);
     Serial.println("LED Configuration:");
     
-    const char* ledNames[] = {"L_BELT_RED", "L_BELT_GREEN_0", "L_BELT_GREEN_1", 
-                             "R_BELT_RED", "R_BELT_GREEN_0", "R_BELT_GREEN_1"};
+    const char* ledNames[] = {"L_BELT_RED", "R_BELT_RED"};
     
     for (int i = 0; i < NUM_LEDS; i++) {
         Serial.printf("  %s: Pin=%d, Delay=%dms, Volatility=%.1f\n", 
@@ -155,7 +151,8 @@ void testDigitalVolatileMode() {
             getLedDelay(i),
             1,  // volatile enabled
             0,  // smooth disabled
-            getLedVolatility(i)
+            getLedVolatility(i),
+            getLedBrightness(i)
         };
     }
     
@@ -186,7 +183,8 @@ void testDigitalNonVolatileMode() {
             getLedDelay(i),
             0,  // volatile disabled
             0,  // smooth disabled
-            1.0f  // volatility doesn't matter when volatile is disabled
+            1.0f,  // volatility doesn't matter when volatile is disabled
+            getLedBrightness(i)
         };
     }
     
@@ -217,7 +215,8 @@ void testSmoothVolatileMode() {
             getLedDelay(i),
             1,  // volatile enabled
             1,  // smooth enabled
-            getLedVolatility(i)
+            getLedVolatility(i),
+            getLedBrightness(i)
         };
     }
     
@@ -248,7 +247,8 @@ void testSmoothNonVolatileMode() {
             getLedDelay(i),
             0,  // volatile disabled
             1,  // smooth enabled
-            1.0f  // volatility doesn't matter when volatile is disabled
+            1.0f,  // volatility doesn't matter when volatile is disabled
+            getLedBrightness(i)
         };
     }
     

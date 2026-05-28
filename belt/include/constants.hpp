@@ -8,32 +8,21 @@
 // -----------------------------------------------------------------------------
 // GPIO PIN DEFINITIONS
 // -----------------------------------------------------------------------------
-// LED Layout: 6 total LEDs organized as follows:
-// - Left Belt: 1 Red, 2 Green (3 LEDs)
-// - Right Belt: 1 Red, 2 Green (3 LEDs)
+// LED Layout: 2 software-controlled red LEDs.
+// Green belt LEDs are powered directly from 3.3V and are not controlled here.
 
-// Left belt LEDs
-#define L_BELT_RED              13
-#define L_BELT_GREEN_0          27
-#define L_BELT_GREEN_1          26
-
-// Right belt LEDs
-#define R_BELT_RED              25
-#define R_BELT_GREEN_0          33
-#define R_BELT_GREEN_1          32
+// Belt red LEDs
+#define L_BELT_RED              5
+#define R_BELT_RED              6
 
 // Touch Sensor Pins
-#define TOUCH_BRIGHTNESS_PIN    14    // GPIO 14 (T6) for brightness control
+#define TOUCH_BRIGHTNESS_PIN    13    // D13 / GPIO 13 for brightness control
 
 // -----------------------------------------------------------------------------
 // BLINK TIMING CONFIGURATION
 // -----------------------------------------------------------------------------
 #define L_BELT_RED_DELAY        1000
-#define L_BELT_GREEN_0_DELAY    1000
-#define L_BELT_GREEN_1_DELAY    1000
 #define R_BELT_RED_DELAY        1000
-#define R_BELT_GREEN_0_DELAY    1000
-#define R_BELT_GREEN_1_DELAY    1000
 
 // -----------------------------------------------------------------------------
 // NORMAL MODE RED LED CONFIGURATION
@@ -53,7 +42,7 @@
 // -----------------------------------------------------------------------------
 // SYSTEM CONFIGURATION
 // -----------------------------------------------------------------------------
-#define NUM_LEDS               6     // Total number of LEDs in the system
+#define NUM_LEDS               2     // Total number of software-controlled LEDs
 
 // -----------------------------------------------------------------------------
 // PWM SMOOTH BLINKING CONFIGURATION
@@ -68,11 +57,7 @@
 // -----------------------------------------------------------------------------
 // Higher values = more volatile/random blinking
 #define L_BELT_RED_VOLATILITY          0.1
-#define L_BELT_GREEN_0_VOLATILITY      0.0
-#define L_BELT_GREEN_1_VOLATILITY      0.0
 #define R_BELT_RED_VOLATILITY          0.9
-#define R_BELT_GREEN_0_VOLATILITY      0.0
-#define R_BELT_GREEN_1_VOLATILITY      0.0
 
 // -----------------------------------------------------------------------------
 // LED BRIGHTNESS CONFIGURATION
@@ -80,11 +65,7 @@
 // Brightness values for each LED (0-255 PWM range)
 // 255 = maximum brightness, 0 = off
 #define L_BELT_RED_BRIGHTNESS          100
-#define L_BELT_GREEN_0_BRIGHTNESS      150
-#define L_BELT_GREEN_1_BRIGHTNESS      150
 #define R_BELT_RED_BRIGHTNESS          100
-#define R_BELT_GREEN_0_BRIGHTNESS      100
-#define R_BELT_GREEN_1_BRIGHTNESS      100
 
 // -----------------------------------------------------------------------------
 // POWER MANAGEMENT CONFIGURATION (BATTERY MODE)

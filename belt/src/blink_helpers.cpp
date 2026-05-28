@@ -32,15 +32,11 @@ void fadeOut(int channel, int steps, int stepDelay, int maxBrightness) {
 // LED CONTROL UTILITIES
 // -----------------------------------------------------------------------------
 // Get PWM channel number for a given GPIO pin
-// Returns a deterministic channel number (0-5) for each belt LED pin
+// Returns a deterministic channel number for each software-controlled belt LED.
 int getPwmChannel(int pin) {
     switch (pin) {
         case L_BELT_RED:        return 0;
-        case L_BELT_GREEN_0:    return 1;
-        case L_BELT_GREEN_1:    return 2;
-        case R_BELT_RED:        return 3;
-        case R_BELT_GREEN_0:    return 4;
-        case R_BELT_GREEN_1:    return 5;
+        case R_BELT_RED:        return 1;
         default:                return 0; // Default fallback
     }
 }

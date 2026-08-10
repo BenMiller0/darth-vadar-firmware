@@ -1,5 +1,4 @@
 #include <Arduino.h>
-#include <WiFi.h>
 #include "constants.hpp"
 #include "led_blink_task.hpp"
 #include "blink_helpers.hpp"

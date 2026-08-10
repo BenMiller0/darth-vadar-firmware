@@ -25,8 +25,8 @@ This firmware uses a dual ESP32 architecture for improved performance and modula
 
 ### Normal Operation
 Edit the constants files in each ESP32 directory:
-- **Belt ESP32**: `belt/include/constants.hpp`
-- **Chest ESP32**: `chest/include/constants.hpp`
+- **Belt ESP32**: `firmware/belt/include/constants.hpp`
+- **Chest ESP32**: `firmware/chest/include/constants.hpp`
 
 The important constants to highlight:
 ```cpp
@@ -116,9 +116,9 @@ The capacitive touch sensor on D13 / GPIO 13 allows real-time brightness adjustm
 - USB cable for programming each ESP32
 
 ### Instructions
-1. **Belt ESP32**: Open the `belt/` directory in VS Code
+1. **Belt ESP32**: Open the `firmware/belt/` directory in VS Code
 2. Use PlatformIO to build and upload to the belt ESP32
-3. **Chest ESP32**: Open the `chest/` directory in VS Code
+3. **Chest ESP32**: Open the `firmware/chest/` directory in VS Code
 4. Use PlatformIO to build and upload to the chest ESP32
 5. **Power On**: Both ESP32s run independently - no wiring needed between them
 6. Monitor serial output at 115200 baud (if enabled) for each ESP32
@@ -133,36 +133,45 @@ The belt project is configured for Adafruit Feather ESP32-S3, and the chest proj
 
 ```
 whiteout/
-├── belt/                         # Belt ESP32 firmware
-│   ├── include/
-│   │   ├── constants.hpp          # Belt configuration constants
-│   │   ├── led_blink_task.hpp     # LED task interface
-│   │   ├── blink_helpers.hpp      # PWM and helper functions
-│   │   ├── normal_mode.hpp        # Normal mode declarations
-│   │   └── memory_profiler.hpp    # Memory profiling utilities
-│   ├── src/
-│   │   ├── main.cpp               # Belt setup & task creation
-│   │   ├── led_blink_task.cpp     # LED task implementation
-│   │   ├── blink_helpers.cpp      # PWM and helper implementation
-│   │   ├── normal_mode.cpp        # Normal mode implementation
-│   │   └── memory_profiler.cpp    # Memory profiling implementation
-│   └── platformio.ini             # PlatformIO configuration
-├── chest/                        # Chest ESP32 firmware
-│   ├── include/
-│   │   ├── constants.hpp          # Chest configuration constants
-│   │   ├── led_blink_task.hpp     # LED task interface
-│   │   ├── blink_helpers.hpp      # PWM and helper functions
-│   │   ├── normal_mode.hpp        # Normal mode declarations
-│   │   └── memory_profiler.hpp    # Memory profiling utilities
-│   ├── src/
-│   │   ├── main.cpp               # Chest setup & task creation
-│   │   ├── led_blink_task.cpp     # LED task implementation
-│   │   ├── blink_helpers.cpp      # PWM and helper implementation
-│   │   ├── normal_mode.cpp        # Normal mode implementation
-│   │   └── memory_profiler.cpp    # Memory profiling implementation
-│   └── platformio.ini             # PlatformIO configuration
+├── firmware/                      # Main firmware directory
+│   ├── belt/                      # Belt ESP32 firmware
+│   │   ├── include/
+│   │   │   ├── constants.hpp      # Belt configuration constants
+│   │   │   ├── normal_mode.hpp    # Normal mode declarations
+│   │   │   └── test_mode.hpp     # Test mode declarations
+│   │   ├── src/
+│   │   │   ├── main.cpp           # Belt setup & task creation
+│   │   │   ├── normal_mode.cpp    # Normal mode implementation
+│   │   │   └── test_mode.cpp     # Test mode implementation
+│   │   └── platformio.ini         # PlatformIO configuration
+│   ├── chest/                     # Chest ESP32 firmware
+│   │   ├── include/
+│   │   │   ├── constants.hpp      # Chest configuration constants
+│   │   │   └── normal_mode.hpp    # Normal mode declarations
+│   │   ├── src/
+│   │   │   ├── main.cpp           # Chest setup & task creation
+│   │   │   └── normal_mode.cpp    # Normal mode implementation
+│   │   └── platformio.ini         # PlatformIO configuration
+│   └── shared/                    # Shared helper files (PlatformIO library)
+│       ├── include/
+│       │   ├── blink_helpers.hpp  # PWM and helper functions
+│       │   ├── led_blink_task.hpp # LED task interface
+│       │   └── memory_profiler.hpp # Memory profiling utilities
+│       ├── src/
+│       │   ├── blink_helpers.cpp # PWM and helper implementation
+│       │   ├── led_blink_task.cpp # LED task implementation
+│       │   └── memory_profiler.cpp # Memory profiling implementation
+│       └── library.properties      # PlatformIO library descriptor
 └── README.md
 ```
+
+### Shared Directory
+The `firmware/shared/` directory contains common code shared between both ESP32 projects:
+- **LED Control**: Blink helpers, LED task management, PWM control
+- **Memory Profiling**: Task monitoring and heap statistics
+- **PlatformIO Library**: Configured as a local library dependency in both projects
+- **No Duplication**: Shared files exist only in `shared/` - not copied to project directories
+- **Automatic Compilation**: Both projects automatically compile shared files during build
 
 ## Modes
 Realistic breathing pattern for Darth Vader suit:

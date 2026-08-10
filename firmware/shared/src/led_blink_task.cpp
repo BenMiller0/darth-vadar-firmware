@@ -4,14 +4,18 @@
 #include <Arduino.h>
 
 // =============================================================================
-// CHEST LED BLINK TASK - MAIN LED CONTROL TASK
+// LED BLINK TASK - MAIN LED CONTROL TASK
 // =============================================================================
 
 // -----------------------------------------------------------------------------
 // MAIN LED BLINK TASK
 // -----------------------------------------------------------------------------
-// This function runs as a FreeRTOS task for each chest LED.
+// This function runs as a FreeRTOS task for each LED.
 // It handles the main blinking logic and delegates to helper functions.
+// 
+// Note: The following functions are conditionally included based on the project:
+// - handleChestRedLED() and isNormalModeChestLED() for chest firmware
+// - handleNormalModeRedLED() and isNormalModeRedLED() for belt firmware
 void ledBlinkTask(void* pvParameters) {
     LedTaskParams* params = static_cast<LedTaskParams*>(pvParameters);
     
@@ -30,12 +34,24 @@ void ledBlinkTask(void* pvParameters) {
     
 #if NORMAL_MODE
     // Check if this is a chest red LED for random blinking
+    #ifdef isNormalModeChestLED
     if (isNormalModeChestLED(params->pin)) {
         // Chest red LEDs randomly blink on for 15s +/- 10s
         while (true) {
             handleChestRedLED(params);
         }
     }
+    #endif
+    
+    // Check if this is a belt red LED for normal mode behavior
+    #ifdef isNormalModeRedLED
+    if (isNormalModeRedLED(params->pin)) {
+        // Belt red LEDs blink on for ~10 seconds, off for 1 second
+        while (true) {
+            handleNormalModeRedLED(params);
+        }
+    }
+    #endif
 #endif
     
     // Main blinking loop for non-normal modes

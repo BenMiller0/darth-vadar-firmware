@@ -2,7 +2,7 @@
 #include <Arduino.h>
 
 // =============================================================================
-// CHEST LED BLINKING HELPER FUNCTIONS
+// LED BLINKING HELPER FUNCTIONS
 // =============================================================================
 
 // -----------------------------------------------------------------------------
@@ -32,14 +32,29 @@ void fadeOut(int channel, int steps, int stepDelay, int maxBrightness) {
 // LED CONTROL UTILITIES
 // -----------------------------------------------------------------------------
 // Get PWM channel number for a given GPIO pin
-// Returns a deterministic channel number (0-2) for each chest LED pin
+// Returns a deterministic channel number for each LED pin
+// Device-specific: Uses pin constants from the including project's constants.hpp
 int getPwmChannel(int pin) {
-    switch (pin) {
-        case CHEST_RED_1:       return 0;
-        case CHEST_RED_2:       return 1;
-        case CHEST_RED_3:       return 2;
-        default:                return 0; // Default fallback
-    }
+    // Chest LED pins
+    #ifdef CHEST_RED_1
+    if (pin == CHEST_RED_1) return 0;
+    #endif
+    #ifdef CHEST_RED_2
+    if (pin == CHEST_RED_2) return 1;
+    #endif
+    #ifdef CHEST_RED_3
+    if (pin == CHEST_RED_3) return 2;
+    #endif
+    
+    // Belt LED pins
+    #ifdef L_BELT_RED
+    if (pin == L_BELT_RED) return 0;
+    #endif
+    #ifdef R_BELT_RED
+    if (pin == R_BELT_RED) return 1;
+    #endif
+    
+    return 0; // Default fallback
 }
 
 // Calculate delay with volatility adjustments

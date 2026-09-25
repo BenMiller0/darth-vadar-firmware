@@ -9,49 +9,35 @@
 #include "test_mode.hpp"
 #endif
 
-// =============================================================================
-// CHEST LED BLINK CONTROLLER - MAIN APPLICATION
-// =============================================================================
-
-// -----------------------------------------------------------------------------
-// LED CONFIGURATION ARRAY
-// -----------------------------------------------------------------------------
-// Parameter array for chest LEDs only. Includes pin #, delay, and mode settings.
-// The configuration adapts based on NORMAL_MODE vs VOLATILE_BLINKING mode.
+// Chest firmware controls three red LEDs. Normal mode ignores the generic blink
+// flags, but keeping the same LedTaskParams shape lets shared test code compile.
 static LedTaskParams ledParams[NUM_LEDS] = {
-    // Chest LEDs
-    {CHEST_RED_1,       CHEST_RED_1_DELAY,      NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.05f : CHEST_RED_1_VOLATILITY,       CHEST_RED_1_BRIGHTNESS},
-    {CHEST_RED_2,       CHEST_RED_2_DELAY,      NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.05f : CHEST_RED_2_VOLATILITY,       CHEST_RED_2_BRIGHTNESS},
-    {CHEST_RED_3,       CHEST_RED_3_DELAY,      NORMAL_MODE ? 0 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.05f : CHEST_RED_3_VOLATILITY,       CHEST_RED_3_BRIGHTNESS}
+    {CHEST_RED_1, CHEST_RED_1_DELAY, VOLATILE_BLINKING, SMOOTH_BLINKING, CHEST_RED_1_VOLATILITY, CHEST_RED_1_BRIGHTNESS},
+    {CHEST_RED_2, CHEST_RED_2_DELAY, VOLATILE_BLINKING, SMOOTH_BLINKING, CHEST_RED_2_VOLATILITY, CHEST_RED_2_BRIGHTNESS},
+    {CHEST_RED_3, CHEST_RED_3_DELAY, VOLATILE_BLINKING, SMOOTH_BLINKING, CHEST_RED_3_VOLATILITY, CHEST_RED_3_BRIGHTNESS}
 };
 
-// -----------------------------------------------------------------------------
-// SETUP FUNCTION
-// -----------------------------------------------------------------------------
 void setup() {
 #if ENABLE_SERIAL_OUTPUT
     Serial.begin(115200);
-    delay(1000); // Wait for serial to be ready
+    delay(1000);
     Serial.println("Chest LED Blink Controller Starting...");
 #endif
     
 #if ENABLE_MEMORY_PROFILING
-    // Initialize memory profiler
     initMemoryProfiler();
     
-    // Create memory profiler task
     xTaskCreate(
         memoryProfilerTask, 
         "Memory Profiler",
-        4096,  // Stack size
+        4096,
         NULL, 
-        1,      // Priority
-        NULL    // Task handle
+        1,
+        NULL
     );
 #endif
 
 #if CPU_FREQUENCY_MHZ != 240
-    // Lower CPU frequency for power savings
     setCpuFrequencyMhz(CPU_FREQUENCY_MHZ);
 #endif
     
@@ -65,10 +51,9 @@ void setup() {
     Serial.println("NORMAL MODE - Initializing chest LED tasks");
 #endif
     
-    // Always initialize PWM pins for brightness control
+    // PWM is used for normal on/off blinking too, because brightness is set by duty cycle.
     initializePwmPins(ledParams, NUM_LEDS);
 
-    // Create separate FreeRTOS task for each chest LED
     TaskHandle_t ledTaskHandles[NUM_LEDS];
     for (int i = 0; i < NUM_LEDS; i++) {
         char taskName[20];
@@ -76,29 +61,23 @@ void setup() {
         xTaskCreate(
             ledBlinkTask, 
             taskName,
-            1000,  // Stack size
+            1000,
             &ledParams[i], 
-            1,      // Priority
-            &ledTaskHandles[i]    // Task handle
+            1,
+            &ledTaskHandles[i]
         );
         
 #if ENABLE_MEMORY_PROFILING
-        // Register task with memory profiler
         registerTaskForProfiling(ledTaskHandles[i], taskName, 1000);
 #endif
     }
 #endif
 }
 
-// -----------------------------------------------------------------------------
-// MAIN LOOP
-// -----------------------------------------------------------------------------
 void loop() {
 #if TEST_MODE
-    // Test mode handles its own execution in runTestMode()
-    delay(1000); // Prevent watchdog timeout
+    delay(1000);
 #else
-    // Chest ESP32 has no touch sensor, so just minimal delay
     delay(1000);
 #endif
 }

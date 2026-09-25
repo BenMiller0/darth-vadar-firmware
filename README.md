@@ -1,189 +1,193 @@
 # Darth Vader Suit Firmware - Dual ESP32 Architecture
-Built on FreeRTOS. For Star Wars Club @ UC San Diego's Screen accurate Darth Vader Suit used for club promotion and film making. Optimizes CPU usage to conserve power and boost performance.
+
+Firmware for the Star Wars Club at UC San Diego's screen-accurate Darth Vader suit, used for club promotion and filmmaking. The suit uses two independent ESP32 controllers so the belt and chest can run separately without communication wiring.
 
 ## Architecture Overview
-This firmware uses a dual ESP32 architecture for improved performance and modularity:
-- **Belt ESP32**: Controls 2 belt red LEDs and touch sensor; green belt LEDs are powered directly from 3.3V
-- **Chest ESP32**: Controls 3 chest red LEDs
-- **Independent Operation**: Each ESP32 runs independently without communication
+
+- **Belt ESP32-S3**: Controls 2 belt red LEDs and the capacitive touch brightness sensor. Green belt LEDs are powered directly from 3.3V.
+- **Chest ESP32**: Controls 3 chest red LEDs.
+- **Independent operation**: Each ESP32 runs its own firmware and LED tasks.
+- **Shared helper library**: Common PWM, blink-task, and optional memory-profiling code lives in `firmware/shared/`.
 
 ## Features
 
-- **5 software-controlled LEDs** split across two ESP32s with dedicated FreeRTOS tasks
-- **Dual ESP32 Architecture** for distributed processing and reliability
-- **Independent Operation**: Each ESP32 runs separately without communication
-- **Capacitive touch brightness control** for belt red LEDs (belt ESP32 only)
-- **Normal mode** with realistic breathing patterns for red LEDs
-- **Smooth PWM fading** or digital on/off blinking
-- **Volatile random mode** with per-LED volatility control
-- **Per-LED brightness control** for fine-tuned appearance
-- **Memory profiling** for monitoring task performance
-- **Power management** with light sleep and CPU frequency scaling
-- **Test mode** for cycling through all configurations
+- 5 software-controlled LEDs split across two ESP32s
+- One FreeRTOS task per software-controlled LED
+- Production normal mode for Darth Vader belt and chest LED timing
+- Capacitive touch brightness control for both belt red LEDs
+- PWM brightness control for on/off blinking and smooth fades
+- Test mode for cycling through generic digital/smooth and volatile/non-volatile blink modes
+- Optional serial output and memory profiling
+- Battery-minded CPU frequency configuration
 
 ## Quick Start
 
-### Normal Operation
-Edit the constants files in each ESP32 directory:
-- **Belt ESP32**: `firmware/belt/include/constants.hpp`
+Edit the constants file for the controller you are building:
+
+- **Belt ESP32-S3**: `firmware/belt/include/constants.hpp`
 - **Chest ESP32**: `firmware/chest/include/constants.hpp`
 
-The important constants to highlight:
+The most important mode flags are:
+
 ```cpp
-#define NORMAL_MODE             1    // Normal breathing mode (0 = volatile mode)
-#define SMOOTH_BLINKING         0    // PWM fading (0 = digital)
-#define VOLATILE_BLINKING       0    // Random timing (0 = steady)
+#define NORMAL_MODE             1    // Production costume behavior
+#define TEST_MODE               0    // Set to 1 to cycle through test blink modes
+#define ENABLE_SERIAL_OUTPUT    0    // Set to 1 for debug prints
 ```
 
+Normal mode is intentionally simple: each LED task calls the local `handleNormalModeLed()` implementation for the belt or chest firmware. The generic `SMOOTH_BLINKING` and `VOLATILE_BLINKING` flags are still used by test mode and experimental non-normal behavior.
+
 ### Test Mode
-If this flag is set to 1 it will cycle through each combination of modes for testing:
+
+If this flag is set to 1, the belt firmware cycles through each generic blink mode for testing:
+
 ```cpp
-#define TEST_MODE              1    // Cycle through all modes
+#define TEST_MODE               1
 ```
 
 ### Power Management
-For battery operation, configure these settings:
+
+For battery operation, keep these settings conservative:
+
 ```cpp
 #define ENABLE_SERIAL_OUTPUT           0     // Disable Serial for power savings
 #define ENABLE_MEMORY_PROFILING        0     // Disable memory profiler
 #define DISABLE_WIFI                   1     // Disable WiFi
-#define CPU_FREQUENCY_MHZ              80    // Lower CPU frequency (80MHz instead of 240MHz)
+#define CPU_FREQUENCY_MHZ              80    // Lower CPU frequency
 #define ENABLE_LIGHT_SLEEP             1     // Enable light sleep during LED off periods
 ```
 
-## Configuration
+## Hardware Configuration
 
-### Belt ESP32-S3 LED Pins
-- L_BELT_RED: D5 / GPIO 5
-- R_BELT_RED: D6 / GPIO 6
-- Green belt LEDs: 3.3V power rail, not GPIO-controlled
+### Belt ESP32-S3 Pins
 
-### Chest ESP32 LED Pins
-- CHEST_RED_1: GPIO 13
-- CHEST_RED_2: GPIO 27
-- CHEST_RED_3: GPIO 26
+- `L_BELT_RED`: D5 / GPIO 5
+- `R_BELT_RED`: D6 / GPIO 6
+- `TOUCH_BRIGHTNESS_PIN`: D13 / GPIO 13
+- Green belt LEDs: powered directly from 3.3V, not GPIO-controlled
 
-### Touch Sensor Pin (Belt ESP32 Only)
-- TOUCH_BRIGHTNESS_PIN: D13 / GPIO 13 - Capacitive touch for belt red LED brightness control
+### Chest ESP32 Pins
 
-### Timing
+- `CHEST_RED_1`: GPIO 13
+- `CHEST_RED_2`: GPIO 27
+- `CHEST_RED_3`: GPIO 26
+
+## Timing And Brightness
+
+Normal belt timing:
+
 ```cpp
-// Base delays (ms)
-#define L_BELT_RED_DELAY        1000
-
-// Normal mode red LED timing
-#define RED_LED_BASE_ON_TIME    10000  // Base on time for red LEDs (10 seconds)
-#define RED_LED_OFF_TIME        1000   // Off time for red LEDs (1 second)
+#define RED_LED_BASE_ON_TIME    10000  // Base on time for belt red LEDs
+#define RED_LED_OFF_TIME        1000   // Off time for belt red LEDs
 #define RED_LED_RANDOM_RANGE    3000   // Random variation range (+/- 3 seconds)
-
-// Normal mode chest red LED timing
-#define CHEST_RED_BASE_OFF_TIME 15000  // Base off time for chest red LEDs (15 seconds)
-#define CHEST_RED_ON_TIME       1000   // On time for chest red LEDs (1 second)
-#define CHEST_RED_RANDOM_RANGE  10000  // Random variation range (+/- 10 seconds)
-
-// Volatility multipliers (0.0-1.0)
-#define L_BELT_RED_VOLATILITY   0.1
-
-// PWM settings (smooth mode)
-#define FADE_STEPS              50
-#define FADE_DELAY              10
-#define PWM_FREQUENCY           5000
-#define PWM_RESOLUTION          8
 ```
 
-### Brightness
-Each software-controlled LED has individual brightness control (0-255 PWM range):
+Normal chest timing:
+
 ```cpp
-#define L_BELT_RED_BRIGHTNESS          100
-#define R_BELT_RED_BRIGHTNESS          100
-// ... etc for chest LEDs
+#define CHEST_RED_BASE_OFF_TIME 15000  // Base off time for chest red LEDs
+#define CHEST_RED_ON_TIME       1000   // On time for chest red LEDs
+#define CHEST_RED_RANDOM_RANGE  10000  // Random variation range (+/- 10 seconds)
 ```
 
-### Touch Sensor Brightness Control
-The capacitive touch sensor on D13 / GPIO 13 allows real-time brightness adjustment for both belt red LEDs (L_BELT_RED and R_BELT_RED):
-- **Touch behavior**: Each touch increments to the next brightness level (button-like)
-- **Debounce**: 1 second between touches to prevent accidental triggers
-- **Brightness levels**: 13 linear steps from 2 to 255 (2, 4, 50, 70, 90, 110, 130, 150, 170, 190, 210, 230, 255)
-- **Immediate sync**: Both LEDs update instantly regardless of blinking phase
-- **Serial output**: Enable `ENABLE_SERIAL_OUTPUT` to see brightness changes in serial monitor
+Brightness uses the ESP32 LEDC PWM peripheral:
 
-## Build & Upload
+```cpp
+#define PWM_FREQUENCY           5000
+#define PWM_RESOLUTION          8      // 0-255 duty-cycle range
 
-### Requirements
-- 1x Adafruit Feather ESP32-S3 development board for belt
-- 1x ESP32 development board for chest
+#define L_BELT_RED_BRIGHTNESS   100
+#define R_BELT_RED_BRIGHTNESS   100
+```
+
+PWM is used for both smooth fades and digital-style on/off blinking so brightness limits still apply.
+
+## Touch Brightness Control
+
+The belt controller's capacitive touch sensor on D13 / GPIO 13 adjusts both belt red LEDs:
+
+- Each accepted touch advances to the next brightness level.
+- Debounce is controlled by `TOUCH_DEBOUNCE_MS`.
+- Sensitivity is controlled by `TOUCH_THRESHOLD`.
+- Brightness levels are fixed in `firmware/belt/src/main.cpp`.
+- The new brightness is written immediately, even if a blink task is mid-cycle.
+
+## Build And Upload
+
+Requirements:
+
+- 1x Adafruit Feather ESP32-S3 development board for the belt
+- 1x ESP32 development board for the chest
 - PlatformIO extension for VS Code
 - USB cable for programming each ESP32
 
-### Instructions
-1. **Belt ESP32**: Open the `firmware/belt/` directory in VS Code
-2. Use PlatformIO to build and upload to the belt ESP32
-3. **Chest ESP32**: Open the `firmware/chest/` directory in VS Code
-4. Use PlatformIO to build and upload to the chest ESP32
-5. **Power On**: Both ESP32s run independently - no wiring needed between them
-6. Monitor serial output at 115200 baud (if enabled) for each ESP32
+Instructions:
 
-### PlatformIO Configuration
-The belt project is configured for Adafruit Feather ESP32-S3, and the chest project is configured for generic ESP32, with:
-- CPU frequency: 80MHz (configurable for power savings)
-- PSRAM enabled
-- USB CDC disabled on boot (for power savings)
+1. Open `firmware/belt/` in VS Code.
+2. Use PlatformIO to build and upload to the belt ESP32-S3.
+3. Open `firmware/chest/` in VS Code.
+4. Use PlatformIO to build and upload to the chest ESP32.
+5. Power both boards. No wiring is required between the two ESP32s.
+6. If serial output is enabled, monitor at 115200 baud.
 
 ## Project Structure
 
-```
+```text
 whiteout/
-├── firmware/                      # Main firmware directory
-│   ├── belt/                      # Belt ESP32 firmware
-│   │   ├── include/
-│   │   │   ├── constants.hpp      # Belt configuration constants
-│   │   │   ├── normal_mode.hpp    # Normal mode declarations
-│   │   │   └── test_mode.hpp     # Test mode declarations
-│   │   ├── src/
-│   │   │   ├── main.cpp           # Belt setup & task creation
-│   │   │   ├── normal_mode.cpp    # Normal mode implementation
-│   │   │   └── test_mode.cpp     # Test mode implementation
-│   │   └── platformio.ini         # PlatformIO configuration
-│   ├── chest/                     # Chest ESP32 firmware
-│   │   ├── include/
-│   │   │   ├── constants.hpp      # Chest configuration constants
-│   │   │   └── normal_mode.hpp    # Normal mode declarations
-│   │   ├── src/
-│   │   │   ├── main.cpp           # Chest setup & task creation
-│   │   │   └── normal_mode.cpp    # Normal mode implementation
-│   │   └── platformio.ini         # PlatformIO configuration
-│   └── shared/                    # Shared helper files (PlatformIO library)
-│       ├── include/
-│       │   ├── blink_helpers.hpp  # PWM and helper functions
-│       │   ├── led_blink_task.hpp # LED task interface
-│       │   └── memory_profiler.hpp # Memory profiling utilities
-│       ├── src/
-│       │   ├── blink_helpers.cpp # PWM and helper implementation
-│       │   ├── led_blink_task.cpp # LED task implementation
-│       │   └── memory_profiler.cpp # Memory profiling implementation
-│       └── library.properties      # PlatformIO library descriptor
-└── README.md
+|-- firmware/
+|   |-- belt/
+|   |   |-- include/
+|   |   |   |-- constants.hpp       # Belt pins, timing, and feature flags
+|   |   |   |-- normal_mode.hpp     # Belt normal-mode declaration
+|   |   |   `-- test_mode.hpp       # Belt test-mode declarations
+|   |   |-- src/
+|   |   |   |-- main.cpp            # Belt setup, tasks, and touch brightness
+|   |   |   |-- normal_mode.cpp     # Belt production LED pattern
+|   |   |   `-- test_mode.cpp       # Belt test-mode implementation
+|   |   `-- platformio.ini
+|   |-- chest/
+|   |   |-- include/
+|   |   |   |-- constants.hpp       # Chest pins, timing, and feature flags
+|   |   |   `-- normal_mode.hpp     # Chest normal-mode declaration
+|   |   |-- src/
+|   |   |   |-- main.cpp            # Chest setup and tasks
+|   |   |   `-- normal_mode.cpp     # Chest production LED pattern
+|   |   `-- platformio.ini
+|   `-- shared/
+|       |-- include/
+|       |   |-- blink_helpers.hpp   # PWM and blink helpers
+|       |   |-- led_blink_task.hpp  # Shared FreeRTOS LED task
+|       |   `-- memory_profiler.hpp # Optional memory profiling
+|       |-- src/
+|       |   |-- blink_helpers.cpp
+|       |   |-- led_blink_task.cpp
+|       |   `-- memory_profiler.cpp
+|       `-- library.properties
+`-- README.md
 ```
 
-### Shared Directory
-The `firmware/shared/` directory contains common code shared between both ESP32 projects:
-- **LED Control**: Blink helpers, LED task management, PWM control
-- **Memory Profiling**: Task monitoring and heap statistics
-- **PlatformIO Library**: Configured as a local library dependency in both projects
-- **No Duplication**: Shared files exist only in `shared/` - not copied to project directories
-- **Automatic Compilation**: Both projects automatically compile shared files during build
+## Code Layout
+
+The shared LED task contains the common task loop. In production normal mode, it delegates to each project's `handleNormalModeLed()` function:
+
+- `firmware/belt/src/normal_mode.cpp`: belt red LEDs stay on for about 10 seconds, then blink off for 1 second.
+- `firmware/chest/src/normal_mode.cpp`: chest red LEDs stay off most of the time, then blink on for 1 second.
+
+This keeps the project-specific behavior close to the project-specific constants, while the shared helpers handle PWM setup, generic blinking, fading, and optional profiling.
 
 ## Modes
-Realistic breathing pattern for Darth Vader suit:
-- **Belt red LEDs**: Long on time (~10s) with short off time (~1s), low volatility
-- **Chest red LEDs**: Long off time (~15s) with short on time (~1s), low volatility
+
+Normal mode is the production Darth Vader suit behavior:
+
+- **Belt red LEDs**: On for about 10 seconds with slight random variation, then off for 1 second
+- **Chest red LEDs**: Off for about 15 seconds with random variation, then on for 1 second
 - **Green belt LEDs**: Steady on from the 3.3V rail
 
-### Volatile Mode
-Random timing patterns with per-LED volatility control:
+When `TEST_MODE` is enabled, the belt firmware cycles through the generic blink modes:
+
 - **Digital + Non-Volatile**: Steady on/off blinking
 - **Digital + Volatile**: Random on/off blinking
 - **Smooth + Non-Volatile**: Steady fade in/out
 - **Smooth + Volatile**: Random fade in/out
 
-Test mode cycles through all 4 volatile modes automatically (5s each).
+Test mode cycles through all 4 generic modes automatically, 5 seconds each. Digital blinking still uses PWM internally so brightness limits continue to apply.

@@ -119,15 +119,8 @@ void handleSolidLED(LedTaskParams* params, int channel) {
     }
 }
 
-// Initialize GPIO pins for digital mode
-void initializeGpioPins(LedTaskParams* params, int count) {
-    for (int i = 0; i < count; i++) {
-        pinMode(params[i].pin, OUTPUT);
-        digitalWrite(params[i].pin, LOW);
-    }
-}
-
-// Initialize PWM pins for smooth blinking mode
+// Initialize PWM pins for brightness-controlled blinking. This is used for
+// smooth fades and for on/off blinking with less than full brightness.
 void initializePwmPins(LedTaskParams* params, int count) {
     for (int i = 0; i < count; i++) {
         int channel = getPwmChannel(params[i].pin);

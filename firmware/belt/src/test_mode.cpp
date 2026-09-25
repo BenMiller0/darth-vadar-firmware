@@ -158,8 +158,7 @@ void testDigitalVolatileMode() {
     
     printTestModeStatus("DIGITAL + VOLATILE", true, false);
     
-    // Reinitialize GPIO pins for digital mode
-    initializeGpioPins(testLedParams, NUM_LEDS);
+    initializePwmPins(testLedParams, NUM_LEDS);
     
     // Create and start LED tasks
     createLedTasks();
@@ -190,8 +189,7 @@ void testDigitalNonVolatileMode() {
     
     printTestModeStatus("DIGITAL + NON-VOLATILE", false, false);
     
-    // Reinitialize GPIO pins for digital mode
-    initializeGpioPins(testLedParams, NUM_LEDS);
+    initializePwmPins(testLedParams, NUM_LEDS);
     
     // Create and start LED tasks
     createLedTasks();

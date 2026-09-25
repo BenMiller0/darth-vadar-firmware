@@ -28,8 +28,8 @@ int calculateDelay(LedTaskParams* params);
 // Handle smooth blinking mode with fade effects
 void handleSmoothBlinking(LedTaskParams* params, int channel);
 
-// Helper function prototypes
-void initializeGpioPins(LedTaskParams* params, int count);
+// Attach each LED pin to a PWM channel. Even digital-style blinking uses PWM so
+// brightness stays adjustable.
 void initializePwmPins(LedTaskParams* params, int count);
 
 // Handle digital blinking mode (on/off without fade)

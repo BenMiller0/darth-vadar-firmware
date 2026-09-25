@@ -26,7 +26,7 @@
 // -----------------------------------------------------------------------------
 // NORMAL MODE CHEST RED LED CONFIGURATION
 // -----------------------------------------------------------------------------
-#define CHEST_RED_BASE_OFF_TIME 11000  // Base off time for chest red LEDs (15 seconds)
+#define CHEST_RED_BASE_OFF_TIME 15000  // Base off time for chest red LEDs (15 seconds)
 #define CHEST_RED_ON_TIME       1000   // On time for chest red LEDs (1 second)
 #define CHEST_RED_RANDOM_RANGE  10000  // Random variation range (+/- 10 seconds)
 

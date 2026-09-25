@@ -9,58 +9,42 @@
 #include "test_mode.hpp"
 #endif
 
-// =============================================================================
-// LED BLINK CONTROLLER - MAIN APPLICATION
-// =============================================================================
-
-// -----------------------------------------------------------------------------
-// LED CONFIGURATION ARRAY
-// -----------------------------------------------------------------------------
-// Parameter array for software-controlled belt red LEDs.
-// The configuration adapts based on NORMAL_MODE vs VOLATILE_BLINKING mode.
+// Belt firmware controls two red LEDs. Normal mode ignores the generic blink
+// flags, but test mode still uses them to exercise digital/smooth/volatile paths.
 static LedTaskParams ledParams[NUM_LEDS] = {
-    {L_BELT_RED,        L_BELT_RED_DELAY,       NORMAL_MODE ? 1 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.1f : L_BELT_RED_VOLATILITY,        L_BELT_RED_BRIGHTNESS},
-    {R_BELT_RED,        R_BELT_RED_DELAY,       NORMAL_MODE ? 1 : VOLATILE_BLINKING, NORMAL_MODE ? 0 : SMOOTH_BLINKING,   NORMAL_MODE ? 0.1f : R_BELT_RED_VOLATILITY,        R_BELT_RED_BRIGHTNESS}
+    {L_BELT_RED, L_BELT_RED_DELAY, VOLATILE_BLINKING, SMOOTH_BLINKING, L_BELT_RED_VOLATILITY, L_BELT_RED_BRIGHTNESS},
+    {R_BELT_RED, R_BELT_RED_DELAY, VOLATILE_BLINKING, SMOOTH_BLINKING, R_BELT_RED_VOLATILITY, R_BELT_RED_BRIGHTNESS}
 };
 
-// Touch sensor brightness control
-static int currentBeltRedBrightness = L_BELT_RED_BRIGHTNESS;
-static int touchThreshold = 30;  // Touch threshold (lower = more sensitive)
 static unsigned long lastTouchTime = 0;
-static const unsigned long touchDebounce = 1000;  // Debounce time in ms (1 second)
 
-// Linear brightness levels (evenly spaced for predictable increments)
+// Touch cycles both belt LEDs through fixed brightness levels. The first two
+// low values are useful for dim indoor appearances without turning the LEDs off.
 static const int brightnessLevels[] = {2, 4, 50, 70, 90, 110, 130, 150, 170, 190, 210, 230, 255};
-static const int numBrightnessLevels = 13;
+static const int numBrightnessLevels = sizeof(brightnessLevels) / sizeof(brightnessLevels[0]);
 static int currentBrightnessIndex = 0;
 
-// -----------------------------------------------------------------------------
-// SETUP FUNCTION
-// -----------------------------------------------------------------------------
 void setup() {
 #if ENABLE_SERIAL_OUTPUT
     Serial.begin(115200);
-    delay(1000); // Wait for serial to be ready
+    delay(1000);
     Serial.println("Belt LED Blink Controller Starting...");
 #endif
     
 #if ENABLE_MEMORY_PROFILING
-    // Initialize memory profiler
     initMemoryProfiler();
     
-    // Create memory profiler task
     xTaskCreate(
         memoryProfilerTask, 
         "Memory Profiler",
-        4096,  // Stack size
+        4096,
         NULL, 
-        1,      // Priority
-        NULL    // Task handle
+        1,
+        NULL
     );
 #endif
 
 #if CPU_FREQUENCY_MHZ != 240
-    // Lower CPU frequency for power savings
     setCpuFrequencyMhz(CPU_FREQUENCY_MHZ);
 #endif
     
@@ -74,10 +58,10 @@ void setup() {
     Serial.println("NORMAL MODE - Initializing belt LED tasks");
 #endif
     
-    // Always initialize PWM pins for brightness control
+    // PWM is used for both normal on/off blinking and smooth fades so brightness
+    // changes work consistently.
     initializePwmPins(ledParams, NUM_LEDS);
 
-    // Create separate FreeRTOS task for each LED
     TaskHandle_t ledTaskHandles[NUM_LEDS];
     for (int i = 0; i < NUM_LEDS; i++) {
         char taskName[20];
@@ -85,65 +69,54 @@ void setup() {
         xTaskCreate(
             ledBlinkTask, 
             taskName,
-            1000,  // Stack size
+            1000,
             &ledParams[i], 
-            1,      // Priority
-            &ledTaskHandles[i]    // Task handle
+            1,
+            &ledTaskHandles[i]
         );
         
 #if ENABLE_MEMORY_PROFILING
-        // Register task with memory profiler
         registerTaskForProfiling(ledTaskHandles[i], taskName, 1000);
 #endif
     }
 #endif
 }
 
-// -----------------------------------------------------------------------------
-// MAIN LOOP
-// -----------------------------------------------------------------------------
 void loop() {
 #if TEST_MODE
-    // Test mode handles its own execution in runTestMode()
-    delay(1000); // Prevent watchdog timeout
+    delay(1000);
 #else
-    // Touch sensor brightness control for both belt red LEDs
+    // Capacitive touch acts like a button: one accepted touch advances one level.
     int touchValue = touchRead(TOUCH_BRIGHTNESS_PIN);
     
-    if (touchValue < touchThreshold) {
+    if (touchValue < TOUCH_THRESHOLD) {
         unsigned long currentTime = millis();
         
-        // Debounce touch detection
-        if (currentTime - lastTouchTime > touchDebounce) {
+        if (currentTime - lastTouchTime > TOUCH_DEBOUNCE_MS) {
             lastTouchTime = currentTime;
             
-            // Cycle through perceptually linear brightness levels
             currentBrightnessIndex = (currentBrightnessIndex + 1) % numBrightnessLevels;
-            currentBeltRedBrightness = brightnessLevels[currentBrightnessIndex];
+            int brightness = brightnessLevels[currentBrightnessIndex];
             
-            // Update the brightness for both belt red LEDs
-            ledParams[0].brightness = currentBeltRedBrightness;  // L_BELT_RED
-            ledParams[1].brightness = currentBeltRedBrightness;  // R_BELT_RED
+            ledParams[0].brightness = brightness;
+            ledParams[1].brightness = brightness;
             
-            // Force immediate PWM update for both LEDs to ensure sync
-            int lBeltChannel = getPwmChannel(L_BELT_RED);
-            int rBeltChannel = getPwmChannel(R_BELT_RED);
-            ledcWrite(lBeltChannel, currentBeltRedBrightness);
-            ledcWrite(rBeltChannel, currentBeltRedBrightness);
+            // Apply the new brightness immediately, even if a blink task is mid-cycle.
+            ledcWrite(getPwmChannel(L_BELT_RED), brightness);
+            ledcWrite(getPwmChannel(R_BELT_RED), brightness);
             
 #if ENABLE_SERIAL_OUTPUT
             Serial.print("Touch detected! Belt red LEDs brightness set to: ");
-            Serial.print(currentBeltRedBrightness);
+            Serial.print(brightness);
             Serial.print(" (level ");
             Serial.print(currentBrightnessIndex + 1);
-            Serial.println("/");
+            Serial.print("/");
             Serial.print(numBrightnessLevels);
             Serial.println(")");
 #endif
         }
     }
     
-    // Small delay to prevent overwhelming the CPU
     delay(50);
 #endif
 }

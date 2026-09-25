@@ -146,8 +146,18 @@ uint8_t getTaskStackUsage(TaskHandle_t taskHandle) {
 }
 
 void performEmergencyMemoryRecovery() {
-    // Emergency memory recovery - currently just a placeholder
+    // Emergency memory recovery - log event and attempt basic recovery
+    logMemoryEvent("EMERGENCY", "Attempting memory recovery");
+
+    // Attempt to free memory by reporting status
     // In a real implementation, this might restart tasks, clear caches, etc.
+    // For now, we just log the event to enable monitoring
+    uint32_t freeHeap = ESP.getFreeHeap();
+    uint32_t minFreeHeap = globalHeapStats.minFreeHeap;
+
+#if ENABLE_SERIAL_OUTPUT
+    Serial.printf("Emergency Recovery: Free=%u, MinFree=%u\n", freeHeap, minFreeHeap);
+#endif
 }
 
 void memoryProfilerTask(void* pvParameters) {

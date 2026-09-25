@@ -17,6 +17,8 @@
 
 // Touch Sensor Pins
 #define TOUCH_BRIGHTNESS_PIN    13    // D13 / GPIO 13 for brightness control
+#define TOUCH_THRESHOLD          30    // Touch threshold (lower = more sensitive)
+#define TOUCH_DEBOUNCE_MS        1000  // Debounce time in ms (1 second)
 
 // -----------------------------------------------------------------------------
 // BLINK TIMING CONFIGURATION
@@ -57,7 +59,7 @@
 // -----------------------------------------------------------------------------
 // Higher values = more volatile/random blinking
 #define L_BELT_RED_VOLATILITY          0.1
-#define R_BELT_RED_VOLATILITY          0.9
+#define R_BELT_RED_VOLATILITY          0.1
 
 // -----------------------------------------------------------------------------
 // LED BRIGHTNESS CONFIGURATION

@@ -3,22 +3,7 @@
 
 #include "led_blink_task.hpp"
 
-// =============================================================================
-// NORMAL MODE - DARTH VADER BELT BEHAVIOR
-// =============================================================================
-// Normal mode implements the canonical Darth Vader belt LED behavior:
-// - Red belt LEDs: Blink on for ~10 seconds, off for 1 second (with random variation)
-
-// -----------------------------------------------------------------------------
-// NORMAL MODE LED BEHAVIORS
-// -----------------------------------------------------------------------------
-
-// Handle red belt LED behavior in normal mode
-// Pattern: ON for ~10 seconds (with +/- 3s random variation), OFF for 1 second
-// Used for: L_BELT_RED, R_BELT_RED
-void handleNormalModeRedLED(LedTaskParams* params);
-
-// Check if a given pin should use normal mode red LED behavior
-bool isNormalModeRedLED(int pin);
+// Belt red LEDs stay on for about 10 seconds, then blink off for 1 second.
+void handleNormalModeLed(LedTaskParams* params);
 
 #endif // NORMAL_MODE_HPP

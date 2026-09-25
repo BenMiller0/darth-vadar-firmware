@@ -3,58 +3,30 @@
 #include "normal_mode.hpp"
 #include <Arduino.h>
 
-// =============================================================================
-// LED BLINK TASK - MAIN LED CONTROL TASK
-// =============================================================================
-
-// -----------------------------------------------------------------------------
-// MAIN LED BLINK TASK
-// -----------------------------------------------------------------------------
-// This function runs as a FreeRTOS task for each LED.
-// It handles the main blinking logic and delegates to helper functions.
-// 
-// Note: The following functions are conditionally included based on the project:
-// - handleChestRedLED() and isNormalModeChestLED() for chest firmware
-// - handleNormalModeRedLED() and isNormalModeRedLED() for belt firmware
+// One FreeRTOS task runs per LED. In normal operation, each project supplies its
+// own handleNormalModeLed() implementation so the shared task does not need to
+// know whether it was compiled for the belt or chest controller.
 void ledBlinkTask(void* pvParameters) {
     LedTaskParams* params = static_cast<LedTaskParams*>(pvParameters);
     
-    // Initialize random seed for this task using pin number for uniqueness
+    // Offset the random sequence for each LED so matching pins do not blink in lockstep.
     randomSeed(millis() + params->pin);
-    
-    // Get PWM channel for this LED
     int channel = getPwmChannel(params->pin);
-    
-    // Check if this LED should be solid (volatility = 0.0)
-    // This applies to both NORMAL_MODE and other modes
+
+#if NORMAL_MODE && !TEST_MODE
+    // Normal mode is the production costume behavior. It bypasses the generic
+    // blink modes because belt and chest LEDs intentionally have different timing.
+    while (true) {
+        handleNormalModeLed(params);
+    }
+#endif
+
+    // The generic modes below are mainly for TEST_MODE and future experiments.
     if (params->volatilityMultiplier == 0.0f) {
         handleSolidLED(params, channel);
-        return; // This will never return due to infinite loop in handleSolidLED
+        return;
     }
-    
-#if NORMAL_MODE
-    // Check if this is a chest red LED for random blinking
-    #ifdef isNormalModeChestLED
-    if (isNormalModeChestLED(params->pin)) {
-        // Chest red LEDs randomly blink on for 15s +/- 10s
-        while (true) {
-            handleChestRedLED(params);
-        }
-    }
-    #endif
-    
-    // Check if this is a belt red LED for normal mode behavior
-    #ifdef isNormalModeRedLED
-    if (isNormalModeRedLED(params->pin)) {
-        // Belt red LEDs blink on for ~10 seconds, off for 1 second
-        while (true) {
-            handleNormalModeRedLED(params);
-        }
-    }
-    #endif
-#endif
-    
-    // Main blinking loop for non-normal modes
+
     while (true) {
         if (params->smoothBlinking == 1) {
             handleSmoothBlinking(params, channel);

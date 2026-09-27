@@ -26,9 +26,9 @@
 // -----------------------------------------------------------------------------
 // NORMAL MODE CHEST RED LED CONFIGURATION
 // -----------------------------------------------------------------------------
-#define CHEST_RED_BASE_OFF_TIME 15000  // Base off time for chest red LEDs (15 seconds)
+#define CHEST_RED_MIN_OFF_TIME  5000   // Minimum off time for chest red LEDs (5 seconds)
+#define CHEST_RED_MAX_OFF_TIME  20000  // Maximum off time for chest red LEDs (20 seconds)
 #define CHEST_RED_ON_TIME       1000   // On time for chest red LEDs (1 second)
-#define CHEST_RED_RANDOM_RANGE  10000  // Random variation range (+/- 10 seconds)
 
 // -----------------------------------------------------------------------------
 // OPERATIONAL MODES

@@ -29,9 +29,9 @@
 // -----------------------------------------------------------------------------
 // NORMAL MODE RED LED CONFIGURATION
 // -----------------------------------------------------------------------------
-#define RED_LED_BASE_ON_TIME    10000  // Base on time for red LEDs (10 seconds)
+#define RED_LED_MIN_ON_TIME     10000  // Minimum on time for red LEDs (10 seconds)
+#define RED_LED_MAX_ON_TIME     15000  // Maximum on time for red LEDs (15 seconds)
 #define RED_LED_OFF_TIME        1000   // Off time for red LEDs (1 second)
-#define RED_LED_RANDOM_RANGE    3000   // Random variation range (+/- 3 seconds)
 
 // -----------------------------------------------------------------------------
 // OPERATIONAL MODES
@@ -66,8 +66,8 @@
 // -----------------------------------------------------------------------------
 // Brightness values for each LED (0-255 PWM range)
 // 255 = maximum brightness, 0 = off
-#define L_BELT_RED_BRIGHTNESS          100
-#define R_BELT_RED_BRIGHTNESS          100
+#define L_BELT_RED_BRIGHTNESS          255
+#define R_BELT_RED_BRIGHTNESS          255
 
 // -----------------------------------------------------------------------------
 // POWER MANAGEMENT CONFIGURATION (BATTERY MODE)

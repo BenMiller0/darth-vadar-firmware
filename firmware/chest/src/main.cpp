@@ -59,7 +59,7 @@ void setup() {
         char taskName[20];
         sprintf(taskName, "ChestLED%d", i);
         xTaskCreate(
-            ledBlinkTask, 
+            chestNormalModeLedTask,
             taskName,
             1000,
             &ledParams[i], 

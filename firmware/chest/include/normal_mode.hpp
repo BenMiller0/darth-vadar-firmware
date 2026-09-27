@@ -5,5 +5,6 @@
 
 // Chest red LEDs stay off most of the time, then blink on briefly.
 void handleNormalModeLed(LedTaskParams* params);
+void chestNormalModeLedTask(void* pvParameters);
 
 #endif // NORMAL_MODE_HPP

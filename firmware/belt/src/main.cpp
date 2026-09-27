@@ -67,10 +67,10 @@ void setup() {
         char taskName[20];
         sprintf(taskName, "BeltLED%d", i);
         xTaskCreate(
-            ledBlinkTask, 
+            normalModeLedTask,
             taskName,
             1000,
-            &ledParams[i], 
+            &ledParams[i],
             1,
             &ledTaskHandles[i]
         );
@@ -108,7 +108,7 @@ void loop() {
 #if ENABLE_SERIAL_OUTPUT
             Serial.print("Touch detected! Belt red LEDs brightness set to: ");
             Serial.print(brightness);
-            Serial.print(" (level ");
+            Serial.print(" (level ");\\ 
             Serial.print(currentBrightnessIndex + 1);
             Serial.print("/");
             Serial.print(numBrightnessLevels);

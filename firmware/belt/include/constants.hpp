@@ -1,81 +1,26 @@
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 
-// =============================================================================
-// LED CONTROLLER - CONSTANTS
-// =============================================================================
-
-// -----------------------------------------------------------------------------
-// GPIO PIN DEFINITIONS
-// -----------------------------------------------------------------------------
-// LED Layout: 2 software-controlled red LEDs.
 // Green belt LEDs are powered directly from 3.3V and are not controlled here.
+#define L_BELT_RED              3
+#define R_BELT_RED              4
 
-// Belt red LEDs
-#define L_BELT_RED              5
-#define R_BELT_RED              6
+// Belt red LEDs stay on most of the time, then blink off briefly.
+#define RED_LED_MIN_ON_TIME     10000
+#define RED_LED_MAX_ON_TIME     15000
+#define RED_LED_OFF_TIME        1000
 
-// Touch Sensor Pins
-#define TOUCH_BRIGHTNESS_PIN    13    // D13 / GPIO 13 for brightness control
-#define TOUCH_THRESHOLD          30    // Touch threshold (lower = more sensitive)
-#define TOUCH_DEBOUNCE_MS        1000  // Debounce time in ms (1 second)
+#define NUM_LEDS                2
+#define LED_UPDATE_INTERVAL_MS  20
 
-// -----------------------------------------------------------------------------
-// BLINK TIMING CONFIGURATION
-// -----------------------------------------------------------------------------
-#define L_BELT_RED_DELAY        1000
-#define R_BELT_RED_DELAY        1000
+// PWM is used so the fixed LED output level can be set by duty cycle.
+#define PWM_FREQUENCY           5000
+#define PWM_RESOLUTION          8
 
-// -----------------------------------------------------------------------------
-// NORMAL MODE RED LED CONFIGURATION
-// -----------------------------------------------------------------------------
-#define RED_LED_MIN_ON_TIME     10000  // Minimum on time for red LEDs (10 seconds)
-#define RED_LED_MAX_ON_TIME     15000  // Maximum on time for red LEDs (15 seconds)
-#define RED_LED_OFF_TIME        1000   // Off time for red LEDs (1 second)
+#define L_BELT_RED_BRIGHTNESS   255
+#define R_BELT_RED_BRIGHTNESS   255
 
-// -----------------------------------------------------------------------------
-// OPERATIONAL MODES
-// -----------------------------------------------------------------------------
-#define TEST_MODE               0
-#define NORMAL_MODE             1
-#define VOLATILE_BLINKING       0
-#define SMOOTH_BLINKING         0
-
-// -----------------------------------------------------------------------------
-// SYSTEM CONFIGURATION
-// -----------------------------------------------------------------------------
-#define NUM_LEDS               2     // Total number of software-controlled LEDs
-
-// -----------------------------------------------------------------------------
-// PWM SMOOTH BLINKING CONFIGURATION
-// -----------------------------------------------------------------------------
-#define FADE_STEPS              50    // Number of steps for fade in/out
-#define FADE_DELAY              10    // Delay between fade steps (ms)
-#define PWM_FREQUENCY           5000  // PWM frequency in Hz
-#define PWM_RESOLUTION          8     // PWM resolution (8 bits = 0-255)
-
-// -----------------------------------------------------------------------------
-// VOLATILITY MULTIPLIERS
-// -----------------------------------------------------------------------------
-// Higher values = more volatile/random blinking
-#define L_BELT_RED_VOLATILITY          0.1
-#define R_BELT_RED_VOLATILITY          0.1
-
-// -----------------------------------------------------------------------------
-// LED BRIGHTNESS CONFIGURATION
-// -----------------------------------------------------------------------------
-// Brightness values for each LED (0-255 PWM range)
-// 255 = maximum brightness, 0 = off
-#define L_BELT_RED_BRIGHTNESS          255
-#define R_BELT_RED_BRIGHTNESS          255
-
-// -----------------------------------------------------------------------------
-// POWER MANAGEMENT CONFIGURATION (BATTERY MODE)
-// -----------------------------------------------------------------------------
-#define ENABLE_SERIAL_OUTPUT           0     // Enable Serial for brightness feedback
-#define ENABLE_MEMORY_PROFILING        0     // Disable memory profiler in normal mode
-#define DISABLE_WIFI                   1     // Disable WiFi for power savings
-#define CPU_FREQUENCY_MHZ              80    // Lower CPU frequency (80MHz instead of 240MHz)
-#define ENABLE_LIGHT_SLEEP             1     // Enable light sleep during LED off periods
+#define ENABLE_SERIAL_OUTPUT    0
+#define CPU_FREQUENCY_MHZ       80
 
 #endif // CONSTANTS_HPP

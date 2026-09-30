@@ -1,80 +1,30 @@
 #ifndef CONSTANTS_HPP
 #define CONSTANTS_HPP
 
-// =============================================================================
-// CHEST LED CONTROLLER - CONSTANTS
-// =============================================================================
-
-// -----------------------------------------------------------------------------
-// GPIO PIN DEFINITIONS
-// -----------------------------------------------------------------------------
-// LED Layout: 3 Chest Red LEDs only
-
 // Chest LEDs
-// Generic ESP32 GPIO pins. Avoid GPIO 6-11, which are normally used by flash.
-#define CHEST_RED_1             13
-#define CHEST_RED_2             27
-#define CHEST_RED_3             26
+// ESP32-C3 SuperMini GPIO assignments. GPIO 5-7 are exposed on the board and
+// avoid the C3 strapping pins, USB pins, and UART pins.
+#define CHEST_RED_1                     5
+#define CHEST_RED_2                     6
+#define CHEST_RED_3                     7
 
-// -----------------------------------------------------------------------------
-// BLINK TIMING CONFIGURATION
-// -----------------------------------------------------------------------------
-#define CHEST_RED_1_DELAY       1000
-#define CHEST_RED_2_DELAY       1000
-#define CHEST_RED_3_DELAY       1000
+// Chest red LEDs stay dark most of the time, then flash on briefly.
+#define CHEST_RED_MIN_OFF_TIME          5000
+#define CHEST_RED_MAX_OFF_TIME          20000
+#define CHEST_RED_ON_TIME               1000
 
-// -----------------------------------------------------------------------------
-// NORMAL MODE CHEST RED LED CONFIGURATION
-// -----------------------------------------------------------------------------
-#define CHEST_RED_MIN_OFF_TIME  5000   // Minimum off time for chest red LEDs (5 seconds)
-#define CHEST_RED_MAX_OFF_TIME  20000  // Maximum off time for chest red LEDs (20 seconds)
-#define CHEST_RED_ON_TIME       1000   // On time for chest red LEDs (1 second)
+#define NUM_LEDS                        3
+#define LED_UPDATE_INTERVAL_MS          20
 
-// -----------------------------------------------------------------------------
-// OPERATIONAL MODES
-// -----------------------------------------------------------------------------
-#define TEST_MODE               0
-#define NORMAL_MODE             1
-#define VOLATILE_BLINKING       0
-#define SMOOTH_BLINKING         0
+// PWM is used so LED brightness can be controlled by duty cycle.
+#define PWM_FREQUENCY                   5000  // PWM frequency in Hz
+#define PWM_RESOLUTION                  8     // PWM resolution (8 bits = 0-255)
 
-// -----------------------------------------------------------------------------
-// SYSTEM CONFIGURATION
-// -----------------------------------------------------------------------------
-#define NUM_LEDS               3     // Total number of LEDs in the system
+#define CHEST_RED_1_BRIGHTNESS          255
+#define CHEST_RED_2_BRIGHTNESS          255
+#define CHEST_RED_3_BRIGHTNESS          255
 
-// -----------------------------------------------------------------------------
-// PWM SMOOTH BLINKING CONFIGURATION
-// -----------------------------------------------------------------------------
-#define FADE_STEPS              50    // Number of steps for fade in/out
-#define FADE_DELAY              10    // Delay between fade steps (ms)
-#define PWM_FREQUENCY           5000  // PWM frequency in Hz
-#define PWM_RESOLUTION          8     // PWM resolution (8 bits = 0-255)
-
-// -----------------------------------------------------------------------------
-// VOLATILITY MULTIPLIERS
-// -----------------------------------------------------------------------------
-// Higher values = more volatile/random blinking
-#define CHEST_RED_1_VOLATILITY         0.05
-#define CHEST_RED_2_VOLATILITY         0.05
-#define CHEST_RED_3_VOLATILITY         0.05
-
-// -----------------------------------------------------------------------------
-// LED BRIGHTNESS CONFIGURATION
-// -----------------------------------------------------------------------------
-// Brightness values for each LED (0-255 PWM range)
-// 255 = maximum brightness, 0 = off
-#define CHEST_RED_1_BRIGHTNESS         255
-#define CHEST_RED_2_BRIGHTNESS         255
-#define CHEST_RED_3_BRIGHTNESS         255
-
-// -----------------------------------------------------------------------------
-// POWER MANAGEMENT CONFIGURATION (BATTERY MODE)
-// -----------------------------------------------------------------------------
-#define ENABLE_SERIAL_OUTPUT           0     // Enable Serial for debugging
-#define ENABLE_MEMORY_PROFILING        0     // Disable memory profiler in normal mode
-#define DISABLE_WIFI                   1     // Disable WiFi for power savings
-#define CPU_FREQUENCY_MHZ              80    // Lower CPU frequency (80MHz instead of 240MHz)
-#define ENABLE_LIGHT_SLEEP             1     // Enable light sleep during LED off periods
+#define ENABLE_SERIAL_OUTPUT            0     // Enable Serial for debugging
+#define CPU_FREQUENCY_MHZ               80    // Lower CPU frequency (80MHz instead of 240MHz)
 
 #endif // CONSTANTS_HPP

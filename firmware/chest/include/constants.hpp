@@ -9,9 +9,15 @@
 #define CHEST_RED_3                     7
 
 // Chest red LEDs stay dark most of the time, then flash on briefly.
-#define CHEST_RED_MIN_OFF_TIME          5000
-#define CHEST_RED_MAX_OFF_TIME          20000
+#define CHEST_RED_MIN_OFF_TIME          10000
+#define CHEST_RED_MAX_OFF_TIME          15000
 #define CHEST_RED_ON_TIME               1000
+
+// Debug mode: keep the chest LEDs on most of the time to test battery behavior.
+#define CHEST_INVERT_ON_OFF             0
+
+// Firmware-only power-bank keep-alive. This increases power use intentionally.
+#define CHEST_BATTERY_KEEPALIVE         1
 
 #define NUM_LEDS                        3
 #define LED_UPDATE_INTERVAL_MS          20
@@ -25,6 +31,6 @@
 #define CHEST_RED_3_BRIGHTNESS          255
 
 #define ENABLE_SERIAL_OUTPUT            0     // Enable Serial for debugging
-#define CPU_FREQUENCY_MHZ               80    // Lower CPU frequency (80MHz instead of 240MHz)
+#define CPU_FREQUENCY_MHZ               160   // ESP32-C3 board default CPU frequency
 
 #endif // CONSTANTS_HPP
